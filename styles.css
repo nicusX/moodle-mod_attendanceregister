@@ -1,0 +1,78 @@
+/*
+    Document   : styles.css
+    Created on : 10-feb-2012, 8.27.43
+    Author     : nicus
+    Description:
+        AttendanceRegister Mod specific styles
+*/
+
+/* Offline Session Form (DIV containing FORM)  */
+.attendanceregister_offlinesessionform { background-color: #F0F0F0;  }
+
+/* Table of tracked Courses */
+.attendanceregister_courselist {}
+.attendanceregister_courselist .lastrow { border-bottom: 1px solid #C0C0C0; }
+
+/* Table of tracked Users */
+.attendanceregister_userlist {}
+.attendanceregister_userlist .lastrow { border-bottom: 1px solid #C0C0C0; }
+
+/* User's Summary (table) */
+.attendanceregister_usersummary {}
+.attendanceregister_usersummary .attendanceregister_onlinesubtotal {font-weight: bold; }
+.attendanceregister_usersummary .attendanceregister_offlinesubtotal {font-weight: bold;
+                                                                     border-top: 1px solid #C0C0C0; }
+.attendanceregister_usersummary .attendanceregister_grandtotal {font-weight: bold;
+                                                                background-color: #F0F0F0;
+                                                                border-top: 1px double #C0C0C0; }
+.attendanceregister_usersummary .lastrow { border-bottom: 1px solid #C0C0C0; }
+
+/* Table of User's Sessions' */
+.attendanceregister_sessionlist {}
+.attendanceregister_sessionlist .online_label { }
+.attendanceregister_sessionlist .offline_label { color: blue; }
+.attendanceregister_sessionlist .lastrow { border-bottom: 1px solid #C0C0C0; }
+
+/* Zebra stripes */
+.attendanceregister_sessionlist .attendanceregister_evenrow,
+.attendanceregister_courselist .attendanceregister_evenrow,
+.attendanceregister_userlist .attendanceregister_evenrow  {  background-color: #F0F0F0; }
+.attendanceregister_sessionlist .attendanceregister_oddrow,
+.attendanceregister_courselist .attendanceregister_oddrow,
+.attendanceregister_userlist .attendanceregister_oddrow { }
+
+/* Button Bars */
+.attendanceregister_buttonbar {position: absolute; right: 10px; overflow: auto;}
+.attendanceregister_buttonbar div.singlebutton { float: left; margin-left: 5px; }
+
+/* Print media styles */
+@media print {
+    body {background: white; font-size: 10pt; }
+
+    /* Hide buttons and action_icons */
+    .attendanceregister_buttonbar, .action-icon {display: none;}
+
+    /* Table specific styles */
+
+    /* Add borders to table */
+    table.attendanceregister_sessionlist,
+    table.attendanceregister_courselist,
+    table.attendanceregister_userlist,
+    table.attendanceregister_usersummary { border: 1px solid #C0C0C0;}
+
+    /* Bottom border to TR and avoid breaking page insie TR*/
+    table.attendanceregister_sessionlist tr,
+    table.attendanceregister_courselist tr,
+    table.attendanceregister_userlist tr,
+    table.attendanceregister_usersummary tr { border-bottom: 1px solid #C0C0C0;
+                                              page-break-inside: avoid;}
+
+    /* Repeat THEAD after every page break */
+    table.attendanceregister_sessionlist thead,
+    table.attendanceregister_courselist thead,
+    table.attendanceregister_userlist thead,
+    table.attendanceregister_usersummary thead {display: table-header-group;}
+
+    /* Clean up links */
+    a:link, a:visited {color: black; text-decoration: none;}
+}

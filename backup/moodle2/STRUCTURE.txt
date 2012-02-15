@@ -1,0 +1,28 @@
+AttendanceRegister backup structure
+---------------------------------------
+* attendanceregister (no user info)
+	- if (attr)
+	- course (not needed)
+	- name
+	- intro (fa: attendanceregister_intro, no itemid) ???
+	- introformat
+	- type
+	- offlinesessions
+	- sessiontimeout
+	- dayscertificable
+	- offlinecomments
+	- mandatoryofflinecomm
+	- offlinespecifycourse
+	- mandofflspeccourse
+	- timemodified
+
+* sessions	(user info)
+	- id (attr)
+	- register (not needed)
+	- userid (annotation)
+	- login
+	- logout
+	- duration
+	- online
+	- refcourseshortname (determined from refcourse)
+	- comments

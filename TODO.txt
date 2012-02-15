@@ -1,0 +1,14 @@
+TODO
+- During Cron, check for orphaned (older than a timeout) locks and delete them
+- SQL scripts for traferring data of 1.9 'register' module in sites upgrated to Moodle 2.x
+
+CANDIDATE FEATURES
+(HIGH) Implements Activity Completition (i.e. the "activity" is complete if the User has spent at least X hourse, Y% online)
+(HIGH) Intercept 'user_deleted', 'user_unenrolled' and 'role_unassigned' events to delete old users's sessions and aggregates
+(MEDIUM) Rewrite Session Update and Recalculate using transactions and remove Locks
+(MEDIUM) Set module defaults via Settings
+(MEDIUM) Intercept 'user_logout' event to explicitely close the current session without waiting for Session Timeout
+(LOW) Never delete offline Sessions but mark as deleted
+
+KNOWN BUGS
+

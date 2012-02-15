@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<XMLDB PATH="mod/attendanceregister/db" VERSION="20110817" COMMENT="XMLDB file for Moodle mod/attendanceregister"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="../../../lib/xmldb/xmldb.xsd"
+>
+  <TABLES>
+    <TABLE NAME="attendanceregister" COMMENT="Attendance Register instances" NEXT="attendanceregister_session">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" SEQUENCE="true" NEXT="course"/>
+        <FIELD NAME="course" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="id" NEXT="name"/>
+        <FIELD NAME="name" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false" PREVIOUS="course" NEXT="type"/>
+        <FIELD NAME="type" TYPE="char" LENGTH="20" NOTNULL="true" SEQUENCE="false" PREVIOUS="name" NEXT="offlinesessions"/>
+        <FIELD NAME="offlinesessions" TYPE="int" LENGTH="1" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="type" NEXT="sessiontimeout"/>
+        <FIELD NAME="sessiontimeout" TYPE="int" LENGTH="4" NOTNULL="true" UNSIGNED="true" DEFAULT="30" SEQUENCE="false" PREVIOUS="offlinesessions" NEXT="dayscertificable"/>
+        <FIELD NAME="dayscertificable" TYPE="int" LENGTH="4" NOTNULL="true" UNSIGNED="true" DEFAULT="10" SEQUENCE="false" PREVIOUS="sessiontimeout" NEXT="offlinecomments"/>
+        <FIELD NAME="offlinecomments" TYPE="int" LENGTH="1" NOTNULL="true" UNSIGNED="true" DEFAULT="1" SEQUENCE="false" PREVIOUS="dayscertificable" NEXT="mandatoryofflinecomm"/>
+        <FIELD NAME="mandatoryofflinecomm" TYPE="int" LENGTH="1" NOTNULL="true" UNSIGNED="true" DEFAULT="1" SEQUENCE="false" PREVIOUS="offlinecomments" NEXT="offlinespecifycourse"/>
+        <FIELD NAME="offlinespecifycourse" TYPE="int" LENGTH="1" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="mandatoryofflinecomm" NEXT="mandofflspeccourse"/>
+        <FIELD NAME="mandofflspeccourse" TYPE="int" LENGTH="1" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="offlinespecifycourse" NEXT="timemodified"/>
+        <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="mandofflspeccourse" NEXT="intro"/>
+        <FIELD NAME="intro" TYPE="text" LENGTH="small" NOTNULL="false" SEQUENCE="false" PREVIOUS="timemodified" NEXT="introformat"/>
+        <FIELD NAME="introformat" TYPE="int" LENGTH="4" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="intro" />
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id" NEXT="course"/>
+        <KEY NAME="course" TYPE="foreign" FIELDS="course" REFTABLE="course" REFFIELDS="id" PREVIOUS="primary"/>
+      </KEYS>
+    </TABLE>
+    <TABLE NAME="attendanceregister_session" COMMENT="Calculated user's sessions" PREVIOUS="attendanceregister" NEXT="attendanceregister_aggregate">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" SEQUENCE="true" NEXT="register"/>
+        <FIELD NAME="register" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="id" NEXT="login"/>
+        <FIELD NAME="login" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="register" NEXT="logout"/>
+        <FIELD NAME="logout" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="login" NEXT="duration"/>
+        <FIELD NAME="duration" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="logout" NEXT="userid"/>
+        <FIELD NAME="userid" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="duration" NEXT="online"/>
+        <FIELD NAME="online" TYPE="int" LENGTH="1" NOTNULL="true" UNSIGNED="true" DEFAULT="1" SEQUENCE="false" PREVIOUS="userid" NEXT="refcourse"/>
+        <FIELD NAME="refcourse" TYPE="int" LENGTH="10" NOTNULL="false" UNSIGNED="true" SEQUENCE="false" PREVIOUS="online" NEXT="comments"/>
+        <FIELD NAME="comments" TYPE="char" LENGTH="255" NOTNULL="false" SEQUENCE="false" PREVIOUS="refcourse"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id" NEXT="attendanceregister"/>
+        <KEY NAME="attendanceregister" TYPE="foreign" FIELDS="register" REFTABLE="attendanceregister" REFFIELDS="id" PREVIOUS="primary" NEXT="user"/>
+        <KEY NAME="user" TYPE="foreign" FIELDS="userid" REFTABLE="user" REFFIELDS="id" PREVIOUS="attendanceregister"/>
+      </KEYS>
+    </TABLE>
+    <TABLE NAME="attendanceregister_aggregate" COMMENT="Session's aggregated per User" PREVIOUS="attendanceregister_session" NEXT="attendanceregister_lock" >
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" SEQUENCE="true" NEXT="register"/>
+        <FIELD NAME="register" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="id" NEXT="userid"/>
+        <FIELD NAME="userid" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="register" NEXT="duration"/>
+        <FIELD NAME="duration" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="userid" NEXT="online"/>
+        <FIELD NAME="online" TYPE="int" LENGTH="1" NOTNULL="false" UNSIGNED="true" DEFAULT="1" SEQUENCE="false" PREVIOUS="duration" NEXT="total"/>
+        <FIELD NAME="total" TYPE="int" LENGTH="1" NOTNULL="true" UNSIGNED="true" DEFAULT="1" SEQUENCE="false" PREVIOUS="online" NEXT="grandtotal"/>
+        <FIELD NAME="grandtotal" TYPE="int" LENGTH="1" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="total" NEXT="refcourse"/>
+        <FIELD NAME="refcourse" TYPE="int" LENGTH="10" NOTNULL="false" UNSIGNED="true" SEQUENCE="false" PREVIOUS="grandtotal"  NEXT="lastsessionlogout"/>
+        <FIELD NAME="lastsessionlogout" TYPE="int" LENGTH="10" NOTNULL="false" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="refcourse"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id" NEXT="attendanceregister"/>
+        <KEY NAME="attendanceregister" TYPE="foreign" FIELDS="register" REFTABLE="attendanceregister" REFFIELDS="id" PREVIOUS="primary" NEXT="user"/>
+        <KEY NAME="user" TYPE="foreign" FIELDS="userid" REFTABLE="user" REFFIELDS="id" PREVIOUS="attendanceregister"/>
+      </KEYS>
+    </TABLE>
+    <TABLE NAME="attendanceregister_lock" COMMENT="Locks on User's Attendance Register during recalculation" PREVIOUS="attendanceregister_aggregate">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" SEQUENCE="true" NEXT="register"/>
+        <FIELD NAME="register" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="id" NEXT="userid"/>
+        <FIELD NAME="userid" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="register" NEXT="takenon"/>
+        <FIELD NAME="takenon" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="userid" />
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id" NEXT="attendanceregister"/>
+        <KEY NAME="attendanceregister" TYPE="foreign" FIELDS="register" REFTABLE="attendanceregister" REFFIELDS="id" PREVIOUS="primary" NEXT="user"/>
+        <KEY NAME="user" TYPE="foreign" FIELDS="userid" REFTABLE="user" REFFIELDS="id" PREVIOUS="attendanceregister"/>
+      </KEYS>
+    </TABLE>
+  </TABLES>
+</XMLDB>
