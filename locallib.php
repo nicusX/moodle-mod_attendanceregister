@@ -114,8 +114,7 @@ function attendanceregister__build_new_user_sessions($register, $userId, $fromTi
 
                 // Update the progress bar, if any
                 if ($progressbar) {
-                    // XXX internazionalizzare il messaggio
-                    $msg = 'Updating ' . fullname($user) . ' online Sessions';
+                    $msg = get_string('updating_online_sessions_of', 'attendanceregister', fullname($user));
 
                     $progressbar->update($logEntriesCount, $totalLogEntriesCount, $msg);
                 }

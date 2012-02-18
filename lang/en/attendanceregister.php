@@ -99,6 +99,7 @@ $string['not_specified'] = '(not specified)';
 
 $string['are_you_sure_to_delete_offline_session'] = 'Are you sure to delete this offline Session?';
 $string['online_session_updated'] = "Online Sessions updated";
+$string['updating_online_sessions_of'] = 'Updating online Sessions of {$a}';
 $string['online_session_updated_report'] = '{$a->fullname} Online Sessions updated: {$a->numnewsessions} new found';
 
 $string['user_sessions_summary'] = 'User\'s Sessions summary';

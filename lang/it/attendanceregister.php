@@ -108,6 +108,7 @@ $string['not_specified'] = '(non spec.)';
 
 $string['are_you_sure_to_delete_offline_session'] = 'Sei sicuro di voler cancellare questa Sessione?';
 $string['online_session_updated'] = "Sessioni online aggiornate";
+$string['updating_online_sessions_of'] = 'Aggiornamento sessioni online di {$a}';
 $string['online_session_updated_report'] = 'Sessioni online di {$a->fullname} aggiornate: trovate {$a->numnewsessions} nuove';
 
 $string['user_sessions_summary'] = 'Riepilogo Utente';
