@@ -63,23 +63,28 @@ class attendanceregister_tracked_users {
         $this->users = attendanceregister_get_tracked_users($register);
         $this->trackedCourses = new attendanceregister_tracked_courses($register);
 
+        $trackedUsersIds = attendanceregister__extract_property($this->users, 'id');
+
         // Retrieve Aggregates summaries
         $aggregates = attendanceregister__get_all_users_aggregate_summaries($register);
         // Remap in an array of attendanceregister_user_aggregates_summary, mapped by userId
         $this->usersSummaryAggregates = array();
         foreach ($aggregates as $aggregate) {
-            // Create User's attendanceregister_user_aggregates_summary instance if not exists
-            if ( !isset( $this->usersSummaryAggregates[ $aggregate->userid ] )) {
-                $this->usersSummaryAggregates[ $aggregate->userid ] = new attendanceregister_user_aggregates_summary();
-            }
-            // Populate attendanceregister_user_aggregates_summary fields
-            if( $aggregate->grandtotal ) {
-                $this->usersSummaryAggregates[ $aggregate->userid ]->grandTotalDuration = $aggregate->duration;
-                $this->usersSummaryAggregates[ $aggregate->userid ]->lastSassionLogout = $aggregate->lastsessionlogout;
-            } else if ( $aggregate->total && $aggregate->online == 1 ) {
-               $this->usersSummaryAggregates[ $aggregate->userid ]->onlineTotalDuration = $aggregate->duration;
-            } else if ( $aggregate->total && $aggregate->online == 0 ) {
-                $this->usersSummaryAggregates[ $aggregate->userid ]->offlineTotalDuration = $aggregate->duration;
+            // Retain only tracked users
+            if ( in_array( $aggregate->userid, $trackedUsersIds) ) {
+                // Create User's attendanceregister_user_aggregates_summary instance if not exists
+                if ( !isset( $this->usersSummaryAggregates[ $aggregate->userid ] )) {
+                    $this->usersSummaryAggregates[ $aggregate->userid ] = new attendanceregister_user_aggregates_summary();
+                }
+                // Populate attendanceregister_user_aggregates_summary fields
+                if( $aggregate->grandtotal ) {
+                    $this->usersSummaryAggregates[ $aggregate->userid ]->grandTotalDuration = $aggregate->duration;
+                    $this->usersSummaryAggregates[ $aggregate->userid ]->lastSassionLogout = $aggregate->lastsessionlogout;
+                } else if ( $aggregate->total && $aggregate->online == 1 ) {
+                $this->usersSummaryAggregates[ $aggregate->userid ]->onlineTotalDuration = $aggregate->duration;
+                } else if ( $aggregate->total && $aggregate->online == 0 ) {
+                    $this->usersSummaryAggregates[ $aggregate->userid ]->offlineTotalDuration = $aggregate->duration;
+                }
             }
         }
     }

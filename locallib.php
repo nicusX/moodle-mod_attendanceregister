@@ -114,8 +114,7 @@ function attendanceregister__build_new_user_sessions($register, $userId, $fromTi
 
                 // Update the progress bar, if any
                 if ($progressbar) {
-                    // XXX internazionalizzare il messaggio
-                    $msg = 'Updating ' . fullname($user) . ' online Sessions';
+                    $msg = get_string('updating_online_sessions_of', 'attendanceregister', fullname($user));
 
                     $progressbar->update($logEntriesCount, $totalLogEntriesCount, $msg);
                 }
@@ -291,11 +290,11 @@ function attendanceregister__get_tracked_courses_ids($register, $course) {
             // This course
             $trackedCoursesIds[] = $course->id;
             // Add all courses linked to the current Course
-            $trackedCoursesIds += attendanceregister__get_coursed_ids_meta_linked($course);
+            $trackedCoursesIds = array_merge($trackedCoursesIds, attendanceregister__get_coursed_ids_meta_linked($course));
             break;
         case ATTENDANCEREGISTER_TYPE_CATEGORY:
             // Add all Courses in the same Category (include this Course)
-            $trackedCoursesIds += attendanceregister__get_courses_ids_in_category($course);
+            $trackedCoursesIds = array_merge($trackedCoursesIds, attendanceregister__get_courses_ids_in_category($course));
             break;
         default:
             // This course only
@@ -434,6 +433,17 @@ function attendanceregister__delete_user_online_sessions($register, $userId) {
 }
 
 /**
+ * Delete all User's Aggrgates of a given User
+ * @param object $register
+ * @param int $userId
+ */
+function attendanceregister__delete_user_aggregates($register, $userId) {
+    global $DB;
+    $DB->delete_records('attendanceregister_aggregate', array('userid' => $userId, 'register' => $register->id));
+}
+
+
+/**
  * Check if a Lock exists on a given User's Register
  * @param object $register
  * @param int $userId
@@ -480,6 +490,24 @@ function attendanceregister__finalize_progress_bar($progressbar, $msg = '') {
 }
 
 /**
+ * Extract an array containing values of a property from an array of objets
+ * @param array $arrayOfObjects
+ * @param string $propertyName
+ * @return array containing only the values of the property
+ */
+function attendanceregister__extract_property($arrayOfObjects, $propertyName) {
+    $arrayOfValue = array();
+    foreach($arrayOfObjects as $obj) {
+        if ( ($objectProperties = get_object_vars($obj) ) ) {
+            if ( isset($objectProperties[$propertyName])) {
+                $arrayOfValue[] = $objectProperties[$propertyName];
+            }
+        }
+    }
+    return $arrayOfValue;
+}
+
+/**
  * Shorten a Comment to a given length, w/o truncating words
  * @param string $text
  * @param int $maxLen
@@ -492,6 +520,24 @@ function attendanceregister__shorten_comment($text, $maxLen = ATTENDANCEREGISTER
         $text = $text . "...";
     }
     return $text;
+}
+
+/**
+ * Returns an array with unique objects in a given array
+ * comparing by id property
+ * @param array $objArray of object
+ * @return array of object
+ */
+function attendanceregister__unique_object_array_by_id($objArray) {
+    $uniqueObjects = array();
+    $uniquObjIds = array();
+    foreach ($objArray as $obj) {
+        if ( !in_array($obj->id, $uniquObjIds)) {
+            $uniquObjIds[] = $obj->id;
+            $uniqueObjects[] = $obj;
+        }
+    }
+    return $uniqueObjects;
 }
 
 /**

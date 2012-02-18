@@ -239,11 +239,18 @@ if ($doShowContents && $doRecalculate) {
         // Turn off time limit: recalculation can be slow
         set_time_limit(0);
 
+        // Cleanup all online Sessions & Aggregates before recalculating [issue #14]
+        attendanceregister_delete_all_users_online_sessions_and_aggregates($register);
+
+        // Reload tracked Users list before Recalculating [issue #14]
+        $newTrackedUsers = attendanceregister_get_tracked_users($register);
+
         // Iterate each user and recalculate Sessions
-        foreach ($trackedUsers->users as $user) {
+        foreach ($newTrackedUsers as $user) {
+
             // Recalculate Session for one User
             $progressbar = new progress_bar('recalcbar_' . $user->id, 500, true);
-            attendanceregister_force_recalc_user_sessions($register, $user->id, $progressbar);
+            attendanceregister_force_recalc_user_sessions($register, $user->id, $progressbar, false); // No delete needed, having done before [issue #14]
         }
         // Reload All Users Sessions
         $trackedUsers = new attendanceregister_tracked_users($register, $userCapabilities);
@@ -289,6 +296,7 @@ else if ($doShowContents) {
         echo $OUTPUT->container_start('attendanceregister_buttonbar');
         // Recalculate this User's Sessions (if allowed & !printable )
         if ($userCapabilities->canRecalcSessions && !$doShowPrintableVersion) {
+            echo $OUTPUT->help_icon('force_recalc_user_session', 'attendanceregister');
             $linkUrl = attendanceregister_makeUrl($register, $userId, null, ATTENDANCEREGISTER_ACTION_RECALCULATE);
             echo $OUTPUT->single_button($linkUrl, get_string('force_recalc_user_session', 'attendanceregister'), 'get');
         }
@@ -330,6 +338,7 @@ else if ($doShowContents) {
         echo $OUTPUT->container_start('attendanceregister_buttonbar');
         // Recalculate Sessions button (only if allowed & !printable)
         if ($userCapabilities->canRecalcSessions && !$doShowPrintableVersion) {
+            echo $OUTPUT->help_icon('force_recalc_all_session', 'attendanceregister');
             $linkUrl = attendanceregister_makeUrl($register, null, null, ATTENDANCEREGISTER_ACTION_RECALCULATE);
             echo $OUTPUT->single_button($linkUrl, get_string('force_recalc_all_session', 'attendanceregister'), 'get');
         }

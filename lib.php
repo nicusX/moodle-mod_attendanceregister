@@ -93,6 +93,11 @@ define("ATTENDANCEREGISTER_MAX_REASONEABLE_OFFLINE_SESSION_SECONDS", 12 * 3600);
  */
 define('ATTENDANCEREGISTER_COMMENTS_SHORTEN_LENGTH', 25);
 
+/**
+ * After how long a Lock is considered an orphan?
+ */
+define('ATTENDANCEREGISTER_ORPHANED_LOCKS_DELAY_SECONDS', 30*60);
+
 // ******************************
 // Moodle Module API functions
 // ******************************
@@ -305,10 +310,15 @@ function attendanceregister_get_extra_capabilities() {
 function attendanceregister_cron() {
     global $DB;
 
+    // Remove orphaned Locks [issue #1]
+    $orphanIfTakenOnBefore = time() - ATTENDANCEREGISTER_ORPHANED_LOCKS_DELAY_SECONDS;
+    $locks = $DB->delete_records_select('attendanceregister_lock', 'takenon < :takenon', array( 'takenon' => $orphanIfTakenOnBefore ) );
+
     $registers = $DB->get_records('attendanceregister');
 
+    // Updates online Sessions
     foreach ($registers as $register) {
-        mtrace('Updating Attendance Register ID ' . $register->id);
+        mtrace('Updating AttendanceRegister ID ' . $register->id);
         $nOfUpdates = attendanceregister_updates_all_users_sessions($register);
         mtrace($nOfUpdates . ' Users updated on Attendance Register ID ' . $register->id);
     }
@@ -397,6 +407,16 @@ function attendanceregister_update_user_sessions($register, $userId, progress_ba
 }
 
 /**
+ * Delete all online Sessions and Aggregates in a given Register
+ * @param object $register
+ */
+function attendanceregister_delete_all_users_online_sessions_and_aggregates($register) {
+    global $DB;
+    $DB->delete_records('attendanceregister_aggregate', array('register' => $register->id));
+    $DB->delete_records('attendanceregister_session', array('register' => $register->id, 'online' => 1));
+}
+
+/**
  * Force recalculation of all sessions for a given User.
  * First delete currently saved Session, then launch update sessions
  * During the process, attain a Lock on the User's Register
@@ -404,13 +424,20 @@ function attendanceregister_update_user_sessions($register, $userId, progress_ba
  * @param object $register
  * @param int $userId
  * @param progress_bar $progressbar
+ * @param boolean $deleteOldData before recalculating (default: true)
  */
-function attendanceregister_force_recalc_user_sessions($register, $userId, progress_bar $progressbar = null) {
+function attendanceregister_force_recalc_user_sessions($register, $userId, progress_bar $progressbar = null, $deleteOldData = true) {
     // Create a Lock on this User's Register
     attendanceregister__attain_lock($register, $userId);
 
-    // Delete all online Sessions of the given User in the Register
-    attendanceregister__delete_user_online_sessions($register, $userId);
+    // If needed, delete old data [issue #14]
+    if ( $deleteOldData ) {
+        // Delete all online Sessions of the given User in the Register
+        attendanceregister__delete_user_online_sessions($register, $userId);
+
+        // Delete aggregates if needed [issue #14]
+        attendanceregister__delete_user_aggregates($register, $userId);
+    }
 
     // Recalculate (ignore frozed bit, as it has been just set)
     attendanceregister_update_user_sessions($register, $userId, $progressbar, true);
@@ -502,8 +529,7 @@ function attendanceregister_check_user_sessions_need_update($register, $userId, 
  * Retrieve all Users tracked by a given Register
  *
  * All Users that in the Register's Course have any Role with "mod/attendanceregister:tracked" Capability assigned.
- * (NOT the Users having this Capability in all tracked Courses!)
- *
+ * (NOT Users having this Capability in all tracked Courses!)
  *
  * @param object $register
  * @return array of users
@@ -512,14 +538,23 @@ function attendanceregister_get_tracked_users($register) {
     $trackedUsers = array();
 
     // Get Context of each Tracked Course
-    $trackedCourses = attendanceregister_get_tracked_courses($register);
-    foreach ($trackedCourses as $course) {
-        $context = get_context_instance(CONTEXT_COURSE, $course->id);
+    $thisCourse = attendanceregister__get_register_course($register);
+    $trackedCoursedIds = attendanceregister__get_tracked_courses_ids($register, $thisCourse);
+    foreach ($trackedCoursedIds as $courseId) {
+        $context = get_context_instance(CONTEXT_COURSE, $courseId);
         $trackedUsersInCourse = get_users_by_capability($context, ATTENDANCEREGISTER_CAPABILITY_TRACKED, '', '', '', '', '', '', false);
         $trackedUsers = array_merge($trackedUsers, $trackedUsersInCourse);
     }
 
-    return $trackedUsers;
+    // Users must be unique [issue #15]
+    $uniqueTrackedUsers = attendanceregister__unique_object_array_by_id($trackedUsers);
+
+    // sort Users by fullname [issue #13]
+    // (hack seen on http://www.php.net/manual/en/function.usort.php#104873 )
+    $compareByFullName = "return strcmp( fullname(\$a), fullname(\$b) );";
+    usort($uniqueTrackedUsers, create_function('$a,$b', $compareByFullName));
+
+    return $uniqueTrackedUsers;
 }
 
 /**

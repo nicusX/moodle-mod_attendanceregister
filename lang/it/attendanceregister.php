@@ -63,7 +63,7 @@ $string['mandatoryofflinespecifycourse_help'] = 'Rende obbligatorio specificare 
 
 $string['type_course'] = 'Solo questo Corso';
 $string['type_category'] = 'Tutti i Corsi nella stessa Categoria';
-$string['type_metaenrol'] = 'Tutti i Corsi con Collegamento Meta Corso';
+$string['type_meta'] = 'Tutti i Corsi con Collegamento Meta Corso';
 
 $string['maynotaddselfcertforother'] = 'Non ti è permesso inserire Sessioni offline per conto di altri Utenti.';
 $string['onlyrealusercanaddofflinesessions'] = 'Solo gli utenti _reali_ possono inserire Sessioni offline (no "Login come...")';
@@ -87,6 +87,27 @@ $string['offline_session_deleted'] = 'La Sessione offline è stata eliminata';
 $string['offline_session_saved'] = 'La nuova Sessione offline è stata salvata';
 $string['show_printable'] = 'Versione Stampabile';
 $string['back_to_normal'] = 'Torna alla versione normale';
+$string['force_recalc_user_session_help'] = 'Cancellla e ricalcola tutte le Sessioni online di questo Utente.<br />
+    Normalmente <b>non è necessario ricalcolare</b> le sessioni!<br />
+    Le nuove Sessioni vengono automaticamente calcolate a aggiunte dopo un certo tempo.<br />
+    Il ricacolo è necessario <b>solamente</b> in questi casi:
+    <ul>
+      <li>Dopo aver modificato il Ruolo di questo Utente e l\'utente aveva precedentemente partecipato a questo Corso (o ad un altro dei Corsi tracciati
+      dal Registro), ma con un ruolo differente; p.e. passa da Docente (non tracciato) a Studente (tracciato)</li>
+      <li>Dopo aver modificato le impostazioni del Registro che influenzano il calcolo delle Sessioni
+      (<i>Modalità di Tracciamento presenza</i> e <i>Timeout di Sessione</i>)</li>
+    </ul>';
+$string['force_recalc_all_session_help'] = 'Cancellla e ricalcola tutte le Sessioni online di tutti gli Utenti tracciati.<br />
+    Normalmente <b>non è necessario ricalcolare</b> le sessioni!<br />
+    Le nuove Sessioni vengono automaticamente calcolate a aggiunte dopo un certo tempo.<br />
+    Il ricacolo è necessario <b>solamente</b> in questi casi:
+    <ul>
+      <li>Dopo aver modificato il Ruolo di un Utente che aveva precedentemente partecipato a questo Corso (o ad un altro dei Corsi tracciati
+      dal Registro), ma con un ruolo differente; p.e. passa da Docente (non tracciato) a Studente (tracciato)</li>
+      <li>Dopo aver modificato le impostazioni del Registro che influenzano il calcolo delle Sessioni
+      (<i>Modalità di Tracciamento presenza</i> e <i>Timeout di Sessione</i>)</li>
+    </ul>
+    Il ricalcolo <b>non è necessario quando si iscrive un nuovo partecipante</b>!';
 
 // Table columns
 $string['count'] = '#';
@@ -108,6 +129,7 @@ $string['not_specified'] = '(non spec.)';
 
 $string['are_you_sure_to_delete_offline_session'] = 'Sei sicuro di voler cancellare questa Sessione?';
 $string['online_session_updated'] = "Sessioni online aggiornate";
+$string['updating_online_sessions_of'] = 'Aggiornamento sessioni online di {$a}';
 $string['online_session_updated_report'] = 'Sessioni online di {$a->fullname} aggiornate: trovate {$a->numnewsessions} nuove';
 
 $string['user_sessions_summary'] = 'Riepilogo Utente';
