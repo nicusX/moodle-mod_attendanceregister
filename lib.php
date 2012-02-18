@@ -93,6 +93,11 @@ define("ATTENDANCEREGISTER_MAX_REASONEABLE_OFFLINE_SESSION_SECONDS", 12 * 3600);
  */
 define('ATTENDANCEREGISTER_COMMENTS_SHORTEN_LENGTH', 25);
 
+/**
+ * After how long a Lock is considered an orphan?
+ */
+define('ATTENDANCEREGISTER_ORPHANED_LOCKS_DELAY_SECONDS', 30*60);
+
 // ******************************
 // Moodle Module API functions
 // ******************************
@@ -305,10 +310,15 @@ function attendanceregister_get_extra_capabilities() {
 function attendanceregister_cron() {
     global $DB;
 
+    // Remove orphaned Locks [issue #1]
+    $orphanIfTakenOnBefore = time() - ATTENDANCEREGISTER_ORPHANED_LOCKS_DELAY_SECONDS;
+    $locks = $DB->delete_records_select('attendanceregister_lock', 'takenon < :takenon', array( 'takenon' => $orphanIfTakenOnBefore ) );
+
     $registers = $DB->get_records('attendanceregister');
 
+    // Updates online Sessions
     foreach ($registers as $register) {
-        mtrace('Updating Attendance Register ID ' . $register->id);
+        mtrace('Updating AttendanceRegister ID ' . $register->id);
         $nOfUpdates = attendanceregister_updates_all_users_sessions($register);
         mtrace($nOfUpdates . ' Users updated on Attendance Register ID ' . $register->id);
     }
