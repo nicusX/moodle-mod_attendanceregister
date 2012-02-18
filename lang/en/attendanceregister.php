@@ -78,6 +78,28 @@ $string['offline_session_deleted'] = 'Offline Session deleted';
 $string['offline_session_saved'] = 'New Offline Session saved';
 $string['show_printable'] = 'Show printable version';
 $string['back_to_normal'] = 'Back to normal version';
+$string['force_recalc_user_session_help'] = 'Delete and recalculate all online Sessions of this User.<br />
+    Normally you <b>do not need to do it</b>!<br />
+    New Sessions are automatically calculated in background (after some delay).<br />
+    This operation may be useful <b>only</b>:
+    <ul>
+      <li>After changing the Role of the User, ant he/she previously acted in any of the tracked Courses with a different Role
+      (i.e. changing from Teacher to Student, when Studet are tracked and Teacher are not).</li>
+      <li>After modifying Register settings that affects Sessions calculation
+      (i.e. <i>Attendance Tracking Mode</i>, <i>Online Session timeout</i>)</li>
+    </ul>';
+$string['force_recalc_all_session_help'] = 'Delete and recalculate all online Sessions of all tracked Users.<br />
+    Normally you <b>do not need to do it</b>!<br />
+    New Sessions are automatically calculated in background (after some delay).<br />
+    This operation may be useful <b>only</b>:
+    <ul>
+      <li>After changing the Role of a User that previously acted in any of the tracked Courses  with a different Role
+      (i.e. changing from Teacher to Student, when Studet are tracked and Teacher are not).</li>
+      <li>After modifying Register settings that affects Sessions calculation
+      (i.e. <i>Attendance Tracking Mode</i>, <i>Online Session timeout</i>)</li>
+    </ul>
+    You <b>do not need to recalculate when enrolling new Users</b>!';
+
 
 // Table columns
 $string['count'] = '#';

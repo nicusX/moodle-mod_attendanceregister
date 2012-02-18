@@ -295,6 +295,7 @@ else if ($doShowContents) {
         echo $OUTPUT->container_start('attendanceregister_buttonbar');
         // Recalculate this User's Sessions (if allowed & !printable )
         if ($userCapabilities->canRecalcSessions && !$doShowPrintableVersion) {
+            echo $OUTPUT->help_icon('force_recalc_user_session', 'attendanceregister');
             $linkUrl = attendanceregister_makeUrl($register, $userId, null, ATTENDANCEREGISTER_ACTION_RECALCULATE);
             echo $OUTPUT->single_button($linkUrl, get_string('force_recalc_user_session', 'attendanceregister'), 'get');
         }
@@ -336,6 +337,7 @@ else if ($doShowContents) {
         echo $OUTPUT->container_start('attendanceregister_buttonbar');
         // Recalculate Sessions button (only if allowed & !printable)
         if ($userCapabilities->canRecalcSessions && !$doShowPrintableVersion) {
+            echo $OUTPUT->help_icon('force_recalc_all_session', 'attendanceregister');
             $linkUrl = attendanceregister_makeUrl($register, null, null, ATTENDANCEREGISTER_ACTION_RECALCULATE);
             echo $OUTPUT->single_button($linkUrl, get_string('force_recalc_all_session', 'attendanceregister'), 'get');
         }

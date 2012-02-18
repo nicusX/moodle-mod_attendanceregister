@@ -87,6 +87,27 @@ $string['offline_session_deleted'] = 'La Sessione offline è stata eliminata';
 $string['offline_session_saved'] = 'La nuova Sessione offline è stata salvata';
 $string['show_printable'] = 'Versione Stampabile';
 $string['back_to_normal'] = 'Torna alla versione normale';
+$string['force_recalc_user_session_help'] = 'Cancellla e ricalcola tutte le Sessioni online di questo Utente.<br />
+    Normalmente <b>non è necessario ricalcolare</b> le sessioni!<br />
+    Le nuove Sessioni vengono automaticamente calcolate a aggiunte dopo un certo tempo.<br />
+    Il ricacolo è necessario <b>solamente</b> in questi casi:
+    <ul>
+      <li>Dopo aver modificato il Ruolo di questo Utente e l\'utente aveva precedentemente partecipato a questo Corso (o ad un altro dei Corsi tracciati
+      dal Registro), ma con un ruolo differente; p.e. passa da Docente (non tracciato) a Studente (tracciato)</li>
+      <li>Dopo aver modificato le impostazioni del Registro che influenzano il calcolo delle Sessioni
+      (<i>Modalità di Tracciamento presenza</i> e <i>Timeout di Sessione</i>)</li>
+    </ul>';
+$string['force_recalc_all_session_help'] = 'Cancellla e ricalcola tutte le Sessioni online di tutti gli Utenti tracciati.<br />
+    Normalmente <b>non è necessario ricalcolare</b> le sessioni!<br />
+    Le nuove Sessioni vengono automaticamente calcolate a aggiunte dopo un certo tempo.<br />
+    Il ricacolo è necessario <b>solamente</b> in questi casi:
+    <ul>
+      <li>Dopo aver modificato il Ruolo di un Utente che aveva precedentemente partecipato a questo Corso (o ad un altro dei Corsi tracciati
+      dal Registro), ma con un ruolo differente; p.e. passa da Docente (non tracciato) a Studente (tracciato)</li>
+      <li>Dopo aver modificato le impostazioni del Registro che influenzano il calcolo delle Sessioni
+      (<i>Modalità di Tracciamento presenza</i> e <i>Timeout di Sessione</i>)</li>
+    </ul>
+    Il ricalcolo <b>non è necessario quando si iscrive un nuovo partecipante</b>!';
 
 // Table columns
 $string['count'] = '#';
