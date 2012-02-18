@@ -247,6 +247,7 @@ if ($doShowContents && $doRecalculate) {
 
         // Iterate each user and recalculate Sessions
         foreach ($newTrackedUsers as $user) {
+
             // Recalculate Session for one User
             $progressbar = new progress_bar('recalcbar_' . $user->id, 500, true);
             attendanceregister_force_recalc_user_sessions($register, $user->id, $progressbar, false); // No delete needed, having done before [issue #14]

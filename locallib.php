@@ -523,6 +523,24 @@ function attendanceregister__shorten_comment($text, $maxLen = ATTENDANCEREGISTER
 }
 
 /**
+ * Returns an array with unique objects in a given array
+ * comparing by id property
+ * @param array $objArray of object
+ * @return array of object
+ */
+function attendanceregister__unique_object_array_by_id($objArray) {
+    $uniqueObjects = array();
+    $uniquObjIds = array();
+    foreach ($objArray as $obj) {
+        if ( !in_array($obj->id, $uniquObjIds)) {
+            $uniquObjIds[] = $obj->id;
+            $uniqueObjects[] = $obj;
+        }
+    }
+    return $uniqueObjects;
+}
+
+/**
  * Class form Offline Session Self-Certification form
  * (Note that the User is always the CURRENT user ($USER) )
  */
