@@ -291,11 +291,11 @@ function attendanceregister__get_tracked_courses_ids($register, $course) {
             // This course
             $trackedCoursesIds[] = $course->id;
             // Add all courses linked to the current Course
-            $trackedCoursesIds += attendanceregister__get_coursed_ids_meta_linked($course);
+            $trackedCoursesIds = array_merge($trackedCoursesIds, attendanceregister__get_coursed_ids_meta_linked($course));
             break;
         case ATTENDANCEREGISTER_TYPE_CATEGORY:
             // Add all Courses in the same Category (include this Course)
-            $trackedCoursesIds += attendanceregister__get_courses_ids_in_category($course);
+            $trackedCoursesIds = array_merge($trackedCoursesIds, attendanceregister__get_courses_ids_in_category($course));
             break;
         default:
             // This course only

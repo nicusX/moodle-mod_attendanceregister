@@ -63,7 +63,7 @@ $string['mandatoryofflinespecifycourse_help'] = 'Rende obbligatorio specificare 
 
 $string['type_course'] = 'Solo questo Corso';
 $string['type_category'] = 'Tutti i Corsi nella stessa Categoria';
-$string['type_metaenrol'] = 'Tutti i Corsi con Collegamento Meta Corso';
+$string['type_meta'] = 'Tutti i Corsi con Collegamento Meta Corso';
 
 $string['maynotaddselfcertforother'] = 'Non ti è permesso inserire Sessioni offline per conto di altri Utenti.';
 $string['onlyrealusercanaddofflinesessions'] = 'Solo gli utenti _reali_ possono inserire Sessioni offline (no "Login come...")';
