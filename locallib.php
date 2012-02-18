@@ -434,6 +434,17 @@ function attendanceregister__delete_user_online_sessions($register, $userId) {
 }
 
 /**
+ * Delete all User's Aggrgates of a given User
+ * @param object $register
+ * @param int $userId
+ */
+function attendanceregister__delete_user_aggregates($register, $userId) {
+    global $DB;
+    $DB->delete_records('attendanceregister_aggregate', array('userid' => $userId, 'register' => $register->id));
+}
+
+
+/**
  * Check if a Lock exists on a given User's Register
  * @param object $register
  * @param int $userId
@@ -477,6 +488,24 @@ function attendanceregister__finalize_progress_bar($progressbar, $msg = '') {
  if ($progressbar) {
         $progressbar->update_full(100, $msg);
  }
+}
+
+/**
+ * Extract an array containing values of a property from an array of objets
+ * @param array $arrayOfObjects
+ * @param string $propertyName
+ * @return array containing only the values of the property
+ */
+function attendanceregister__extract_property($arrayOfObjects, $propertyName) {
+    $arrayOfValue = array();
+    foreach($arrayOfObjects as $obj) {
+        if ( ($objectProperties = get_object_vars($obj) ) ) {
+            if ( isset($objectProperties[$propertyName])) {
+                $arrayOfValue[] = $objectProperties[$propertyName];
+            }
+        }
+    }
+    return $arrayOfValue;
 }
 
 /**
