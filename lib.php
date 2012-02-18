@@ -536,7 +536,10 @@ function attendanceregister_get_tracked_users($register) {
         $trackedUsers = array_merge($trackedUsers, $trackedUsersInCourse);
     }
 
-    // XXX [issue #13] sort Users
+    // sort Users by fullname [issue #13]
+    // (hack seen on http://www.php.net/manual/en/function.usort.php#104873 )
+    $compareByFullName = "return strcmp( fullname(\$a), fullname(\$b) );";
+    usort($trackedUsers, create_function('$a,$b', $compareByFullName));
 
     return $trackedUsers;
 }
