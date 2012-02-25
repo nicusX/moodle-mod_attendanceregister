@@ -85,6 +85,7 @@ function attendanceregister__build_new_user_sessions($register, $userId, $fromTi
     $sessionStartTimestamp = null;
     $logEntriesCount = 0;
     $newSessionsCount = 0;
+    $sessionLastEntryTimestamp = 0;
 
 
     // lop new entries if any
@@ -107,7 +108,9 @@ function attendanceregister__build_new_user_sessions($register, $userId, $fromTi
                 $newSessionsCount++;
 
                 // Estimate Session ended half the Session Timeout after the prev log entry
-                $estimatedSessionEnd = $prevLogEntry->time + $sessionTimeoutSeconds / 2;
+                // (prev log entry is the last entry of the Session)
+                $sessionLastEntryTimestamp = $prevLogEntry->time;
+                $estimatedSessionEnd = $sessionLastEntryTimestamp + $sessionTimeoutSeconds / 2;
 
                 // Save a new session to the prev entry
                 attendanceregister__save_session($register, $userId, $sessionStartTimestamp, $estimatedSessionEnd);
@@ -123,6 +126,26 @@ function attendanceregister__build_new_user_sessions($register, $userId, $fromTi
                 $sessionStartTimestamp = $logEntry->time;
             }
             $prevLogEntry = $logEntry;
+        }
+
+        // If le last log entry is not the end of the last calculated session and is older than SessionTimeout
+        // create a last session
+        if ( $logEntry->time > $sessionLastEntryTimestamp && ( time() - $logEntry->time ) > $sessionTimeoutSeconds  ) {
+            $newSessionsCount++;
+
+            // In this case logEntry (and not prevLogEntry is the last entry of the Session)
+            $sessionLastEntryTimestamp = $logEntry->time;
+            $estimatedSessionEnd = $sessionLastEntryTimestamp + $sessionTimeoutSeconds / 2;
+
+            // Save a new session to the prev entry
+            attendanceregister__save_session($register, $userId, $sessionStartTimestamp, $estimatedSessionEnd);
+
+            // Update the progress bar, if any
+            if ($progressbar) {
+                $msg = get_string('updating_online_sessions_of', 'attendanceregister', fullname($user));
+
+                $progressbar->update($logEntriesCount, $totalLogEntriesCount, $msg);
+            }
         }
     }
 
