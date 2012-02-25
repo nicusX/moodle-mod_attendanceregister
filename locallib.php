@@ -31,18 +31,18 @@ function attendanceregister__get_register_course($register) {
 }
 
 /**
- * Calculate the the end of the last Session already calculated
+ * Calculate the the end of the last online Session already calculated
  * for a given user, retrieving the User's Sessions (i.e. do not use cached timestamp in aggregate)
  * If no Session exists, returns 0
  * @param object $register
  * @param int $userId
  * @return int
  */
-function attendanceregister__calculate_last_user_session_logout($register, $userId) {
+function attendanceregister__calculate_last_user_online_session_logout($register, $userId) {
     global $DB;
 
     $queryParams = array('register' => $register->id, 'userid' => $userId);
-    $lastSessionEnd = $DB->get_field_sql('SELECT MAX(logout) FROM {attendanceregister_session} WHERE register = ? AND userid = ?', $queryParams);
+    $lastSessionEnd = $DB->get_field_sql('SELECT MAX(logout) FROM {attendanceregister_session} WHERE register = ? AND userid = ? AND online = 1', $queryParams);
     if ($lastSessionEnd === false) {
         $lastSessionEnd = 0;
     }
@@ -224,7 +224,7 @@ function attendanceregister__update_user_aggregates($register, $userId) {
         $grandTotalAggregate->grandtotal = 1;
     }
     // Add lastSessionLogout to GrandTotal
-    $grandTotalAggregate->lastsessionlogout = attendanceregister__calculate_last_user_session_logout($register, $userId);
+    $grandTotalAggregate->lastsessionlogout = attendanceregister__calculate_last_user_online_session_logout($register, $userId);
     // Append record
     $aggregates[] = $grandTotalAggregate;
 
@@ -538,6 +538,24 @@ function attendanceregister__unique_object_array_by_id($objArray) {
         }
     }
     return $uniqueObjects;
+}
+
+/**
+ * Format a dateTime using userdate()
+ * If Debug configuration is active and at ALL or DEVELOPER level,
+ * adds extra informations on UnixTimestamp
+ * @param int $dateTime
+ * @return string
+ */
+function attendanceregister__formatDateTime($dateTime) {
+    global $CFG;
+    if ( $CFG->debugdisplay && $CFG->debug >= DEBUG_DEVELOPER ) {
+        return userdate($dateTime) . ' ['. $dateTime . ']';
+    } else if ( $CFG->debugdisplay && $CFG->debug >= DEBUG_ALL ) {
+        return '<a title="' . $dateTime . '">'. userdate($dateTime) .'</a>';
+    }
+    return userdate($dateTime);
+
 }
 
 /**
