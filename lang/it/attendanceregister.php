@@ -126,6 +126,7 @@ $string['grandtotal_time'] = 'Totale generale';
 $string['online'] = 'Online';
 $string['offline'] = 'Offline';
 $string['not_specified'] = '(non spec.)';
+$string['never'] = '(mai)';
 
 $string['are_you_sure_to_delete_offline_session'] = 'Sei sicuro di voler cancellare questa Sessione?';
 $string['online_session_updated'] = "Sessioni online aggiornate";

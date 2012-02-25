@@ -392,8 +392,9 @@ function attendanceregister_update_user_sessions($register, $userId, progress_ba
         $lastSessionLogout = 0;
         $needUpdate = true;
     } else {
-        $needUpdate = attendanceregister_check_user_sessions_need_update($register, $userId);
-        $lastSessionLogout = attendanceregister__calculate_last_user_session_logout($register, $userId);
+        $lastSessionLogout = 0;
+        $needUpdate = attendanceregister_check_user_sessions_need_update($register, $userId, $lastSessionLogout);
+//        $lastSessionLogout = attendanceregister__calculate_last_user_session_logout($register, $userId);
     }
 
     if ($needUpdate) {
@@ -506,7 +507,7 @@ function attendanceregister_check_user_sessions_need_update($register, $userId, 
     // Retrieve User's Grand Total Aggregate (if any)
     $userGrandTotalAggregate = attendanceregister__get_cached_user_grandtotal($register, $userId);
 
-    // If user neve log in, no update needed ;)
+    // If user never logged in, no update needed ;)
     if (!$user->lastaccess) {
         return false;
     }

@@ -156,7 +156,7 @@ class attendanceregister_tracked_users {
                     $tableRow->cells[] = $tableCell;
                 }
 
-                $lastSessionLogoutStr = ($userAggregate)?( userdate( $userAggregate->lastSassionLogout ) ):( get_string('no_session','attendanceregister') );
+                $lastSessionLogoutStr = ($userAggregate)?( attendanceregister__formatDateTime( $userAggregate->lastSassionLogout ) ):( get_string('no_session','attendanceregister') );
                 $tableCell = new html_table_cell( $lastSessionLogoutStr );
                  $tableRow->cells[] = $tableCell;
 

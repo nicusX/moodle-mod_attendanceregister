@@ -31,18 +31,18 @@ function attendanceregister__get_register_course($register) {
 }
 
 /**
- * Calculate the the end of the last Session already calculated
+ * Calculate the the end of the last online Session already calculated
  * for a given user, retrieving the User's Sessions (i.e. do not use cached timestamp in aggregate)
  * If no Session exists, returns 0
  * @param object $register
  * @param int $userId
  * @return int
  */
-function attendanceregister__calculate_last_user_session_logout($register, $userId) {
+function attendanceregister__calculate_last_user_online_session_logout($register, $userId) {
     global $DB;
 
     $queryParams = array('register' => $register->id, 'userid' => $userId);
-    $lastSessionEnd = $DB->get_field_sql('SELECT MAX(logout) FROM {attendanceregister_session} WHERE register = ? AND userid = ?', $queryParams);
+    $lastSessionEnd = $DB->get_field_sql('SELECT MAX(logout) FROM {attendanceregister_session} WHERE register = ? AND userid = ? AND online = 1', $queryParams);
     if ($lastSessionEnd === false) {
         $lastSessionEnd = 0;
     }
@@ -85,6 +85,7 @@ function attendanceregister__build_new_user_sessions($register, $userId, $fromTi
     $sessionStartTimestamp = null;
     $logEntriesCount = 0;
     $newSessionsCount = 0;
+    $sessionLastEntryTimestamp = 0;
 
 
     // lop new entries if any
@@ -107,7 +108,9 @@ function attendanceregister__build_new_user_sessions($register, $userId, $fromTi
                 $newSessionsCount++;
 
                 // Estimate Session ended half the Session Timeout after the prev log entry
-                $estimatedSessionEnd = $prevLogEntry->time + $sessionTimeoutSeconds / 2;
+                // (prev log entry is the last entry of the Session)
+                $sessionLastEntryTimestamp = $prevLogEntry->time;
+                $estimatedSessionEnd = $sessionLastEntryTimestamp + $sessionTimeoutSeconds / 2;
 
                 // Save a new session to the prev entry
                 attendanceregister__save_session($register, $userId, $sessionStartTimestamp, $estimatedSessionEnd);
@@ -123,6 +126,26 @@ function attendanceregister__build_new_user_sessions($register, $userId, $fromTi
                 $sessionStartTimestamp = $logEntry->time;
             }
             $prevLogEntry = $logEntry;
+        }
+
+        // If le last log entry is not the end of the last calculated session and is older than SessionTimeout
+        // create a last session
+        if ( $logEntry->time > $sessionLastEntryTimestamp && ( time() - $logEntry->time ) > $sessionTimeoutSeconds  ) {
+            $newSessionsCount++;
+
+            // In this case logEntry (and not prevLogEntry is the last entry of the Session)
+            $sessionLastEntryTimestamp = $logEntry->time;
+            $estimatedSessionEnd = $sessionLastEntryTimestamp + $sessionTimeoutSeconds / 2;
+
+            // Save a new session to the prev entry
+            attendanceregister__save_session($register, $userId, $sessionStartTimestamp, $estimatedSessionEnd);
+
+            // Update the progress bar, if any
+            if ($progressbar) {
+                $msg = get_string('updating_online_sessions_of', 'attendanceregister', fullname($user));
+
+                $progressbar->update($logEntriesCount, $totalLogEntriesCount, $msg);
+            }
         }
     }
 
@@ -224,7 +247,7 @@ function attendanceregister__update_user_aggregates($register, $userId) {
         $grandTotalAggregate->grandtotal = 1;
     }
     // Add lastSessionLogout to GrandTotal
-    $grandTotalAggregate->lastsessionlogout = attendanceregister__calculate_last_user_session_logout($register, $userId);
+    $grandTotalAggregate->lastsessionlogout = attendanceregister__calculate_last_user_online_session_logout($register, $userId);
     // Append record
     $aggregates[] = $grandTotalAggregate;
 
@@ -538,6 +561,32 @@ function attendanceregister__unique_object_array_by_id($objArray) {
         }
     }
     return $uniqueObjects;
+}
+
+/**
+ * Format a dateTime using userdate()
+ * If Debug configuration is active and at ALL or DEVELOPER level,
+ * adds extra informations on UnixTimestamp
+ * and return "Never" if timestamp is 0
+ * @param int $dateTime
+ * @return string
+ */
+function attendanceregister__formatDateTime($dateTime) {
+    global $CFG;
+
+    // If Timestamp = 0 or null return "Never"
+    if ( !$dateTime ) {
+        return get_string('never', 'attendanceregister');
+    }
+
+
+    if ( $CFG->debugdisplay && $CFG->debug >= DEBUG_DEVELOPER ) {
+        return userdate($dateTime) . ' ['. $dateTime . ']';
+    } else if ( $CFG->debugdisplay && $CFG->debug >= DEBUG_ALL ) {
+        return '<a title="' . $dateTime . '">'. userdate($dateTime) .'</a>';
+    }
+    return userdate($dateTime);
+
 }
 
 /**

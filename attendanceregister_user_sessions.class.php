@@ -121,7 +121,8 @@ class attendanceregister_user_sessions {
                 $duration = attendanceregister_format_duration($session->duration);
 
                 // Basic columns
-                $tableRow = new html_table_row( array($rowcountStr, userdate($session->login), userdate($session->logout), $duration) );
+//                $tableRow = new html_table_row( array($rowcountStr, userdate($session->login), userdate($session->logout), $duration) );
+                $tableRow = new html_table_row( array($rowcountStr, attendanceregister__formatDateTime($session->login), attendanceregister__formatDateTime($session->logout), $duration) );
 
                 // Add class for zebra stripes
                 $tableRow->attributes['class'] .= (  ($rowcount % 2)?' attendanceregister_oddrow':' attendanceregister_evenrow' );

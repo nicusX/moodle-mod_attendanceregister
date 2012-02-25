@@ -123,7 +123,7 @@ class attendanceregister_user_aggregates  {
         $labelCell->text = get_string('prev_site_login', 'attendanceregister');
         $row->cells[] = $labelCell;
         $valueCell = new html_table_cell();
-        $valueCell->text = userdate($this->user->lastlogin);
+        $valueCell->text = attendanceregister__formatDateTime($this->user->lastlogin);
         $row->cells[] = $valueCell;
         $table->data[] = $row;
 
@@ -135,7 +135,7 @@ class attendanceregister_user_aggregates  {
         $labelCell->text = get_string('last_site_login', 'attendanceregister');
         $row->cells[] = $labelCell;
         $valueCell = new html_table_cell();
-        $valueCell->text = userdate($this->user->currentlogin);
+        $valueCell->text = attendanceregister__formatDateTime($this->user->currentlogin);
         $row->cells[] = $valueCell;
         $table->data[] = $row;
 
@@ -146,7 +146,7 @@ class attendanceregister_user_aggregates  {
         $labelCell->text = get_string('last_site_access', 'attendanceregister');
         $row->cells[] = $labelCell;
         $valueCell = new html_table_cell();
-        $valueCell->text = userdate($this->user->lastaccess);
+        $valueCell->text = attendanceregister__formatDateTime($this->user->lastaccess);
         $row->cells[] = $valueCell;
         $table->data[] = $row;
 
@@ -158,7 +158,7 @@ class attendanceregister_user_aggregates  {
         $labelCell->text = get_string('last_calc_online_session_logout', 'attendanceregister');
         $row->cells[] = $labelCell;
         $valueCell = new html_table_cell();
-        $valueCell->text = userdate($this->lastSassionLogout);
+        $valueCell->text = attendanceregister__formatDateTime($this->lastSassionLogout);
         $row->cells[] = $valueCell;
         $table->data[] = $row;
 
