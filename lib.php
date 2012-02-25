@@ -393,7 +393,7 @@ function attendanceregister_update_user_sessions($register, $userId, progress_ba
         $needUpdate = true;
     } else {
         $lastSessionLogout = 0;
-        $needUpdate = attendanceregister_check_user_sessions_need_update($register, $userId. $lastSessionLogout);
+        $needUpdate = attendanceregister_check_user_sessions_need_update($register, $userId, $lastSessionLogout);
 //        $lastSessionLogout = attendanceregister__calculate_last_user_session_logout($register, $userId);
     }
 

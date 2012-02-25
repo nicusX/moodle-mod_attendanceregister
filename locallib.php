@@ -567,11 +567,19 @@ function attendanceregister__unique_object_array_by_id($objArray) {
  * Format a dateTime using userdate()
  * If Debug configuration is active and at ALL or DEVELOPER level,
  * adds extra informations on UnixTimestamp
+ * and return "Never" if timestamp is 0
  * @param int $dateTime
  * @return string
  */
 function attendanceregister__formatDateTime($dateTime) {
     global $CFG;
+
+    // If Timestamp = 0 or null return "Never"
+    if ( !$dateTime ) {
+        return get_string('never', 'attendanceregister');
+    }
+
+
     if ( $CFG->debugdisplay && $CFG->debug >= DEBUG_DEVELOPER ) {
         return userdate($dateTime) . ' ['. $dateTime . ']';
     } else if ( $CFG->debugdisplay && $CFG->debug >= DEBUG_ALL ) {

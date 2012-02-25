@@ -118,6 +118,7 @@ $string['grandtotal_time'] = 'Total Time';
 $string['online'] = 'Online';
 $string['offline'] = 'Offline';
 $string['not_specified'] = '(not specified)';
+$string['never'] = '(never)';
 
 $string['are_you_sure_to_delete_offline_session'] = 'Are you sure to delete this offline Session?';
 $string['online_session_updated'] = "Online Sessions updated";
