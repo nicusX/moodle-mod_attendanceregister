@@ -39,7 +39,7 @@
 .attendanceregister_userlist .attendanceregister_evenrow  {  background-color: #F0F0F0; }
 .attendanceregister_sessionlist .attendanceregister_oddrow,
 .attendanceregister_courselist .attendanceregister_oddrow,
-.attendanceregister_userlist .attendanceregister_oddrow { }
+.attendanceregister_userlist .attendanceregister_oddrow {  background-color: #FEFEFE; }
 
 /* Button Bars */
 .attendanceregister_buttonbar {position: absolute; right: 10px; overflow: auto;}
