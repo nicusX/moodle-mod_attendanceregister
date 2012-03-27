@@ -613,6 +613,7 @@ class mod_attendanceregister_selfcertification_edit_form extends moodleform {
         $defLogout = $refTs;
         $defLogin = $refTs - 3600;
 
+
         // Title
         $mform->addElement('html','<h1>' . get_string('insert_new_offline_session', 'attendanceregister') . '</h1>');
 
@@ -669,6 +670,8 @@ class mod_attendanceregister_selfcertification_edit_form extends moodleform {
         $mform->addElement('hidden', 'action');
         $mform->setType('action', PARAM_ACTION);
         $mform->setDefault('action',  ATTENDANCEREGISTER_ACTION_SAVE_OFFLINE_SESSION);
+
+
 
         // buttons
         $this->add_action_buttons();

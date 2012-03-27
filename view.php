@@ -70,9 +70,10 @@ if (!($context = get_context_instance(CONTEXT_MODULE, $cm->id))) {
 // User's Capabilities
 $userCapabilities = new attendanceregister_user_capablities($context);
 
-// If $userId is 0 and the current user has not the capability required to view others,
+// If $userId is 0 and the current user has not the capability required to view others
+// or if he is saving an offline Session,
 // force viewing his own register
-if (!$userId && !$userCapabilities->canViewOtherRegisters) {
+if ( $inputAction == ATTENDANCEREGISTER_ACTION_SAVE_OFFLINE_SESSION || (!$userId && !$userCapabilities->canViewOtherRegisters) ) {
     $userId = $USER->id;
 }
 
@@ -204,7 +205,7 @@ $mform = null;
 if ($doShowOfflineSessionForm && !$doShowPrintableVersion) {
 
     // Prepare Form
-    $customFormData = array('register' => $register, 'courses' => $userSessions->trackedCourses->courses);
+    $customFormData = array('register' => $register, 'courses' => $userSessions->trackedCourses->courses );
     $mform = new mod_attendanceregister_selfcertification_edit_form(null, $customFormData);
 
 
