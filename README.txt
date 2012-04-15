@@ -12,7 +12,8 @@ This program is free software; you can redistribute it and/or modify it under th
 This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details: http://www.gnu.org/copyleft/gpl.html
 
 Created by: Lorenzo Nicora (nicus)
-Thanks to MediaTouch 2000 (http://www.mediatouch.it/) for great testing support
+Thanks to MediaTouch 2000 (www.mediatouch.it) for great testing support.
+Based on the idea of Register module for Moodle 1.x, originally created by Domenico Pontari (fairsayan@gmail.com)
 
 Project Page:
 * https://github.com/nicusX/moodle-mod_attendanceregister
