@@ -314,7 +314,7 @@ else if ($doShowContents) {
 
         /// Offline Session Form
         // Show Offline Session Self-Certifiation Form (not in printable)
-        if ($mform && !$doShowPrintableVersion) {
+        if ($mform && $register->offlinesessions && !$doShowPrintableVersion) {
             echo "<br />";
             echo $OUTPUT->box_start('generalbox attendanceregister_offlinesessionform');
             $mform->display();
