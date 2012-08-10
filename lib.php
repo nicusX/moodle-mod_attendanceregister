@@ -434,8 +434,11 @@ function attendanceregister_force_recalc_user_sessions($register, $userId, progr
 
     // If needed, delete old data [issue #14]
     if ( $deleteOldData ) {
+        // Retrieve the oldest User's log entry timestamp
+        $oldestLogEntryTime = attendanceregister__get_user_oldest_log_entry_timestamp($userId);
+
         // Delete all online Sessions of the given User in the Register
-        attendanceregister__delete_user_online_sessions($register, $userId);
+        attendanceregister__delete_user_online_sessions($register, $userId, $oldestLogEntryTime);
 
         // Delete aggregates if needed [issue #14]
         attendanceregister__delete_user_aggregates($register, $userId);
@@ -728,4 +731,3 @@ function attendanceregister_add_to_log($register, $cmId, $action, $userId = null
     // Add Log Entry
     add_to_log($register->course, 'attendanceregister', $logAction, $logUrl, '', $cmId);
 }
-

@@ -60,7 +60,7 @@ below)
 
 Note 1: Adding Offline Sessions is NOT allowed when another user (Admin) is "Logged
 in as..." the tracked User.
-Note 2: Adding Offile Sessions for another user is allowed only with
+Note 2: [since rel.2.2.1] Adding Offile Sessions for another user is allowed only with
 the mod/attendanceregister:addotherofflinesess capability (Denied by default)
 
 
@@ -107,7 +107,13 @@ so AVOID FORCE RECALCULATING SESSIONS.
 Recalculating Sessions is only needed when "Attendance Mode" or "Session Timeout"
 settings changes, as they influence the way Offline Sessions are estimated.
 
+Before rel.2.2.1, if older Log entries are deleted (as in many big sites),
+force-recalculating loose older Sessions.
+Since rel.2.2.1 force-recalculation will never delete (nor recalculate) Sessions
+older than the oldest Log Entry of the User.
+
 Force Recalculating DO NOT affect Offline Sessions.
+
 
 
 PRINTABLE VERSION
@@ -146,7 +152,7 @@ g) mod/attendanceregister:recalcsessions
    If a User may view other's Sessions ("mod/attendanceregister:viewotherregisters")
    may recalculate for all Users, otherwise may recalculate only his/her own
    sessions.
-h) mod/attendanceregister:addotherofflinesess
+h) mod/attendanceregister:addotherofflinesess [since rel.2.2.1]
    Default: Disabled for all
    Allow submitting an Offline Session for another User
    ("mod/attendanceregister:viewotherregisters" is also needed, to view the
