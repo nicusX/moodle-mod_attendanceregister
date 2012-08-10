@@ -117,6 +117,8 @@ older than the oldest Log Entry of the User.
 Since rel.2.2.1, Session recalculation may be scheduled for execution by the next
 cron, instead of executing immediately.
 This could be better for very crowded Courses.
+Note: recalculation is automatically scheduled when you change Session Timeout
+setting of the Register instance.
 
 
 PRINTABLE VERSION
