@@ -73,8 +73,12 @@ $string['attendanceregister:recalcsessions'] = "Can force Attendance Register's 
 // Buttons & Links labels
 $string['force_recalc_user_session'] = 'Recalculate this User\'s online Sessions';
 $string['force_recalc_all_session'] = 'Recalculate all online Sessions';
+$string['force_recalc_all_session_now'] = 'Recalculate Sessions, now';
+$string['schedule_reclalc_all_session'] = 'Schedule recalculating Sessions';
+$string['scheduled_recalc_pending'] = 'Sessions recalculating pending';
 $string['back_to_tracked_user_list'] = 'Back to tracked Users list';
 $string['recalc_complete'] = 'Sessions Recalculation complete';
+$string['recalc_scheduled'] = 'Session recalculation has been scheduled. It will execute on next Cron';
 $string['offline_session_deleted'] = 'Offline Session deleted';
 $string['offline_session_saved'] = 'New Offline Session saved';
 $string['show_printable'] = 'Show printable version';
@@ -99,7 +103,9 @@ $string['force_recalc_all_session_help'] = 'Delete and recalculate all online Se
       <li>After modifying Register settings that affects Sessions calculation
       (i.e. <i>Attendance Tracking Mode</i>, <i>Online Session timeout</i>)</li>
     </ul>
-    You <b>do not need to recalculate when enrolling new Users</b>!';
+    You <b>do not need to recalculate when enrolling new Users</b>!<br /><br />
+    Recalculation can be executed immediately or scheduled for execution by the next cron.
+    Scheduled execution could be more efficient for very crowded courses.';
 
 
 // Table columns

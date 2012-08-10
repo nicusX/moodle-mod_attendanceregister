@@ -48,6 +48,7 @@ define("ATTENDANCEREGISTER_ACTION_PRINTABLE", "printable");
 define("ATTENDANCEREGISTER_ACTION_RECALCULATE", "recalc");
 define("ATTENDANCEREGISTER_ACTION_SAVE_OFFLINE_SESSION", "saveoffline");
 define("ATTENDANCEREGISTER_ACTION_DELETE_OFFLINE_SESSION", "deloffline");
+define("ATTENDANCEREGISTER_ACTION_SCHEDULERECALC", "schedrecalc");
 
 // Logging Actions
 define('ATTENDANCEREGISTER_LOGACTION_VIEW', 'view');
@@ -317,11 +318,20 @@ function attendanceregister_cron() {
 
     $registers = $DB->get_records('attendanceregister');
 
-    // Updates online Sessions
     foreach ($registers as $register) {
+        // Updates online Sessions
         mtrace('Updating AttendanceRegister ID ' . $register->id);
         $nOfUpdates = attendanceregister_updates_all_users_sessions($register);
         mtrace($nOfUpdates . ' Users updated on Attendance Register ID ' . $register->id);
+
+        // Process pending recalculation
+        if ( $register->pendingrecalc ) {
+             mtrace('Recalculating AttendanceRegister ID ' . $register->id . '...');
+             attendanceregister_force_recalc_all($register);
+
+             // Reset pendingrecalc flag
+             attendanceregister_set_pending_recalc($register, false);
+        }
     }
 }
 
@@ -454,7 +464,7 @@ function attendanceregister_force_recalc_user_sessions($register, $userId, progr
 /**
  * Force Recalculating all User's Sessions
  * Executes quietly (no Progress Bar)
- * (called after Restore)
+ * (called after Restore and by Cron)
  * @param object $register
  */
 function attendanceregister_force_recalc_all($register) {
@@ -662,7 +672,17 @@ function attendanceregister_delete_offline_session($register, $userId, $sessionI
     attendanceregister__update_user_aggregates($register, $userId);
 }
 
-
+/**
+ * Updates pendingrecalc flag of a Register
+ *
+ * @global type $DB
+ * @param object $register
+ * @param boolea $pendingRecalc
+ */
+function attendanceregister_set_pending_recalc($register, $pendingRecalc) {
+    global $DB;
+    $DB->update_record_raw('attendanceregister', array( 'id'=>$register->id, 'pendingrecalc'=>$pendingRecalc) );
+}
 
 
 /**

@@ -98,10 +98,16 @@ if ( $userCapabilities->itsMe($userId) ) {
 
 // Require capability to recalculate
 $doRecalculate = false;
-if ($inputAction == ATTENDANCEREGISTER_ACTION_RECALCULATE) {
+$doScheduleRecalc = false;
+if ($inputAction == ATTENDANCEREGISTER_ACTION_RECALCULATE ) {
     require_capability(ATTENDANCEREGISTER_CAPABILITY_RECALC_SESSIONS, $context);
     $doRecalculate = true;
 }
+if ($inputAction == ATTENDANCEREGISTER_ACTION_SCHEDULERECALC ) {
+    require_capability(ATTENDANCEREGISTER_CAPABILITY_RECALC_SESSIONS, $context);
+    $doScheduleRecalc = true;
+}
+
 
 // Printable version?
 $doShowPrintableVersion = false;
@@ -242,39 +248,58 @@ if ($doShowOfflineSessionForm && !$doShowPrintableVersion) {
 }
 
 //// Process Recalculate
-if ($doShowContents && $doRecalculate) {
+if ($doShowContents && ($doRecalculate||$doScheduleRecalc)) {
 
     if ($userId) {
-        // Recalculate Session for one User
+        //// Recalculate Session for one User
         $progressbar = new progress_bar('recalcbar', 500, true);
         attendanceregister_force_recalc_user_sessions($register, $userId, $progressbar);
 
         // Reload User's Sessions
         $userSessions = new attendanceregister_user_sessions($register, $userId, $userCapabilities);
     } else {
-        // Recalculate Session for all User
-        // Turn off time limit: recalculation can be slow
-        set_time_limit(0);
 
-        // Cleanup all online Sessions & Aggregates before recalculating [issue #14]
-        attendanceregister_delete_all_users_online_sessions_and_aggregates($register);
-
-        // Reload tracked Users list before Recalculating [issue #14]
-        $newTrackedUsers = attendanceregister_get_tracked_users($register);
-
-        // Iterate each user and recalculate Sessions
-        foreach ($newTrackedUsers as $user) {
-
-            // Recalculate Session for one User
-            $progressbar = new progress_bar('recalcbar_' . $user->id, 500, true);
-            attendanceregister_force_recalc_user_sessions($register, $user->id, $progressbar, false); // No delete needed, having done before [issue #14]
+        //// Schedule Recalculation
+        if ( $doScheduleRecalc ) {
+            // Set peding recalc, if set
+            if ( !$register->pendingrecalc ) {
+                attendanceregister_set_pending_recalc($register, true);
+            }
         }
-        // Reload All Users Sessions
-        $trackedUsers = new attendanceregister_tracked_users($register, $userCapabilities);
+
+        //// Recalculate Session for all User
+        if ( $doRecalculate ) {
+            // Reset peding recalc, if set
+            if ( $register->pendingrecalc ) {
+                attendanceregister_set_pending_recalc($register, false);
+            }
+
+            // Turn off time limit: recalculation can be slow
+            set_time_limit(0);
+
+            // Cleanup all online Sessions & Aggregates before recalculating [issue #14]
+            attendanceregister_delete_all_users_online_sessions_and_aggregates($register);
+
+            // Reload tracked Users list before Recalculating [issue #14]
+            $newTrackedUsers = attendanceregister_get_tracked_users($register);
+
+            // Iterate each user and recalculate Sessions
+            foreach ($newTrackedUsers as $user) {
+
+                // Recalculate Session for one User
+                $progressbar = new progress_bar('recalcbar_' . $user->id, 500, true);
+                attendanceregister_force_recalc_user_sessions($register, $user->id, $progressbar, false); // No delete needed, having done before [issue #14]
+            }
+            // Reload All Users Sessions
+            $trackedUsers = new attendanceregister_tracked_users($register, $userCapabilities);
+        }
     }
 
     // Notification & Continue button
-    echo $OUTPUT->notification(get_string('recalc_complete', 'attendanceregister'), 'notifysuccess');
+    if ( $doRecalculate || $doScheduleRecalc ) {
+        $notificationStr = get_string( ($doRecalculate)?'recalc_complete':'recalc_scheduled', 'attendanceregister');
+        echo $OUTPUT->notification($notificationStr, 'notifysuccess');
+    }
     echo $OUTPUT->continue_button(attendanceregister_makeUrl($register, $userId));
     $doShowContents = false;
 }
@@ -290,14 +315,15 @@ else if ($doShowContents && $doDeleteOfflineSession) {
 }
 //// Show Contents: User's Sesions (if $userID) or Tracked Users summary
 else if ($doShowContents) {
-    // Show User's Sessions
+
+    //// Show User's Sessions
     if ($userId) {
 
         /// Update sessions
 
         // If Update-on-view is enabled and it is not executing Recalculate and is not
         // in Printable-version, updates User's Sessions (and aggregates)
-        if (ATTENDANCEREGISTER_UPDATE_SESSIONS_ON_VIEW && !$doShowPrintableVersion && !$doRecalculate) {
+        if (ATTENDANCEREGISTER_UPDATE_SESSIONS_ON_VIEW && !$doShowPrintableVersion && !$doRecalculate && !$doScheduleRecalc) {
             $progressbar = new progress_bar('recalcbar', 500, true);
             $updated = attendanceregister_update_user_sessions($register, $userId, $progressbar);
 
@@ -348,7 +374,8 @@ else if ($doShowContents) {
         echo "<br />";
         echo html_writer::table($userSessions->html_table());
     }
-    // Show list of Tracked Users summary
+
+    //// Show list of Tracked Users summary
     else {
 
         /// Button bar
@@ -357,8 +384,15 @@ else if ($doShowContents) {
         if ($userCapabilities->canRecalcSessions && !$doShowPrintableVersion) {
             echo $OUTPUT->help_icon('force_recalc_all_session', 'attendanceregister');
             $linkUrl = attendanceregister_makeUrl($register, null, null, ATTENDANCEREGISTER_ACTION_RECALCULATE);
-            echo $OUTPUT->single_button($linkUrl, get_string('force_recalc_all_session', 'attendanceregister'), 'get');
+            echo $OUTPUT->single_button($linkUrl, get_string('force_recalc_all_session_now', 'attendanceregister'), 'get');
+            if ( !$register->pendingrecalc ) {
+                $linkUrl = attendanceregister_makeUrl($register, null, null, ATTENDANCEREGISTER_ACTION_SCHEDULERECALC);
+                echo $OUTPUT->single_button($linkUrl, get_string('schedule_reclalc_all_session', 'attendanceregister'), 'get');
+            } else {
+                echo $OUTPUT->single_button('', get_string('scheduled_recalc_pending', 'attendanceregister'), 'get', array('disabled'=>true));
+            }
         }
+
         // Printable version button or Back to normal version
         $linkUrl = attendanceregister_makeUrl($register, null, null, ( ($doShowPrintableVersion) ? (null) : (ATTENDANCEREGISTER_ACTION_PRINTABLE)));
         echo $OUTPUT->single_button($linkUrl, (($doShowPrintableVersion) ? (get_string('back_to_normal', 'attendanceregister')) : (get_string('show_printable', 'attendanceregister'))), 'get');

@@ -107,13 +107,16 @@ so AVOID FORCE RECALCULATING SESSIONS.
 Recalculating Sessions is only needed when "Attendance Mode" or "Session Timeout"
 settings changes, as they influence the way Offline Sessions are estimated.
 
+Force Recalculating DO NOT affect Offline Sessions.
+
 Before rel.2.2.1, if older Log entries are deleted (as in many big sites),
 force-recalculating loose older Sessions.
 Since rel.2.2.1 force-recalculation will never delete (nor recalculate) Sessions
 older than the oldest Log Entry of the User.
 
-Force Recalculating DO NOT affect Offline Sessions.
-
+Since rel.2.2.1, Session recalculation may be scheduled for execution by the next
+cron, instead of executing immediately.
+This could be better for very crowded Courses.
 
 
 PRINTABLE VERSION

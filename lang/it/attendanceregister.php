@@ -82,8 +82,12 @@ $string['attendanceregister:recalcsessions'] = 'Può forzare il Ricalcolo delle 
 // Buttons & Links labels
 $string['force_recalc_user_session'] = 'Forza Ricalcolo Sessioni online di questo Utente';
 $string['force_recalc_all_session'] = 'Forza Ricalcolo delle Sessioni online di tutti gli Utenti';
+$string['force_recalc_all_session_now'] = 'Ricalcolo Sessioni immediato';
+$string['schedule_reclalc_all_session'] = 'Programma ricalcolo Sessioni';
+$string['scheduled_recalc_pending'] = 'Il ricalcolo Sessioni è stato programmato';
 $string['back_to_tracked_user_list'] = 'Torna alla lista degli Utenti';
 $string['recalc_complete'] = 'Ricalcolo Sessioni online completato';
+$string['recalc_scheduled'] = 'Il ricalcolo Sessioni è stato programmato. Verrà eseguito al prossimo Cron';
 $string['offline_session_deleted'] = 'La Sessione offline è stata eliminata';
 $string['offline_session_saved'] = 'La nuova Sessione offline è stata salvata';
 $string['show_printable'] = 'Versione Stampabile';
@@ -98,7 +102,7 @@ $string['force_recalc_user_session_help'] = 'Cancellla e ricalcola tutte le Sess
       <li>Dopo aver modificato le impostazioni del Registro che influenzano il calcolo delle Sessioni
       (<i>Modalità di Tracciamento presenza</i> e <i>Timeout di Sessione</i>)</li>
     </ul>';
-$string['force_recalc_all_session_help'] = 'Cancellla e ricalcola tutte le Sessioni online di tutti gli Utenti tracciati.<br />
+$string['force_recalc_all_session_help'] = 'Cancella e ricalcola tutte le Sessioni online di tutti gli Utenti tracciati.<br />
     Normalmente <b>non è necessario ricalcolare</b> le sessioni!<br />
     Le nuove Sessioni vengono automaticamente calcolate a aggiunte dopo un certo tempo.<br />
     Il ricacolo è necessario <b>solamente</b> in questi casi:
@@ -108,7 +112,10 @@ $string['force_recalc_all_session_help'] = 'Cancellla e ricalcola tutte le Sessi
       <li>Dopo aver modificato le impostazioni del Registro che influenzano il calcolo delle Sessioni
       (<i>Modalità di Tracciamento presenza</i> e <i>Timeout di Sessione</i>)</li>
     </ul>
-    Il ricalcolo <b>non è necessario quando si iscrive un nuovo partecipante</b>!';
+    Il ricalcolo <b>non è necessario quando si iscrive un nuovo partecipante</b>!<br /><br />
+    L\'esecuzione può essere immediata oppure programmata.<br />
+    Il ricalcolo programmato (consigliabile per corsi molto affollati)
+    viene eseguito automaticamente alla prossima esecuzione del Cron.';
 
 // Table columns
 $string['count'] = '#';
