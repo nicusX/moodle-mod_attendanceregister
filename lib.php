@@ -61,7 +61,8 @@ define('ATTENDANCEREGISTER_LOGACTION_RECALCULTATE', 'recalculate');
 define("ATTENDANCEREGISTER_CAPABILITY_TRACKED", "mod/attendanceregister:tracked");
 define("ATTENDANCEREGISTER_CAPABILITY_VIEW_OTHER_REGISTERS", "mod/attendanceregister:viewotherregisters");
 define("ATTENDANCEREGISTER_CAPABILITY_VIEW_OWN_REGISTERS", "mod/attendanceregister:viewownregister");
-define("ATTENDANCEREGISTER_CAPABILITY_ADD_OWN_OFFLINE_SESSION", "mod/attendanceregister:addownofflinesess");
+define("ATTENDANCEREGISTER_CAPABILITY_ADD_OWN_OFFLINE_SESSIONS", "mod/attendanceregister:addownofflinesess");
+define("ATTENDANCEREGISTER_CAPABILITY_ADD_OTHER_OFFLINE_SESSIONS", "mod/attendanceregister:addotherofflinesess");
 define("ATTENDANCEREGISTER_CAPABILITY_DELETE_OWN_OFFLINE_SESSIONS", "mod/attendanceregister:deleteownofflinesess");
 define("ATTENDANCEREGISTER_CAPABILITY_DELETE_OTHER_OFFLINE_SESSIONS", "mod/attendanceregister:deleteotherofflinesess");
 define("ATTENDANCEREGISTER_CAPABILITY_RECALC_SESSIONS", "mod/attendanceregister:recalcsessions");
@@ -297,7 +298,7 @@ function attendanceregister_get_extra_capabilities() {
         ATTENDANCEREGISTER_CAPABILITY_TRACKED,
         ATTENDANCEREGISTER_CAPABILITY_VIEW_OTHER_REGISTERS,
         ATTENDANCEREGISTER_CAPABILITY_VIEW_OWN_REGISTERS,
-        ATTENDANCEREGISTER_CAPABILITY_ADD_OWN_OFFLINE_SESSION,
+        ATTENDANCEREGISTER_CAPABILITY_ADD_OWN_OFFLINE_SESSIONS,
         ATTENDANCEREGISTER_CAPABILITY_DELETE_OTHER_OFFLINE_SESSIONS,
         ATTENDANCEREGISTER_CAPABILITY_RECALC_SESSIONS,
     );
@@ -559,6 +560,16 @@ function attendanceregister_get_tracked_users($register) {
 }
 
 /**
+ * Checks if a given User is tracked by a Register instance
+ */
+function attendanceregister_is_tracked_user($register, $user) {
+    $course = attendanceregister__get_register_course($register);
+    $context = get_context_instance(CONTEXT_COURSE, $course->id);
+
+    return has_capability(ATTENDANCEREGISTER_CAPABILITY_TRACKED, $context, $user);
+}
+
+/**
  * Retrieve all Courses tracked by this Register
  * @param object $register
  * @return array of Course
@@ -609,26 +620,30 @@ function attendanceregister_format_duration($duration, $default = null) {
  * Updates Aggregates after saving
  *
  * @param object $register
- * @param int $userId
  * @param array $formData
  */
-function attendanceregister_save_offline_session($register, $userId, $formData) {
-    global $DB;
+function attendanceregister_save_offline_session($register, $formData) {
+    global $DB, $USER;
 
     $session = new stdClass();
     $session->register = $register->id;
-    $session->userid = $userId;
+    // If a userid has not been set in the form (the user is saving in his own Register) use current $USER
+    $session->userid =  (isset($formData->userid))?($formData->userid):($USER->id);
     $session->online = 0;
     $session->login = $formData->login;
     $session->logout = $formData->logout;
     $session->duration = $formData->logout - $formData->login;
     $session->refcourse = (isset($formData->refcourse)) ? ($formData->refcourse) : null; // Hack needed as 0 is passed as refcourse if no refcourse has been selected
     $session->comments = $formData->comments;
+    // If saved for another user, record the current user
+    if ( $USER->id != $session->userid ) {
+        $session->addedbyuserid = $USER->id;
+    }
 
     $DB->insert_record('attendanceregister_session', $session);
 
     // Update aggregates
-    attendanceregister__update_user_aggregates($register, $userId);
+    attendanceregister__update_user_aggregates($register,  $session->userid );
 }
 
 /**

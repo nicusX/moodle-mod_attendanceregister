@@ -52,6 +52,7 @@ class restore_attendanceregister_activity_structure_step extends restore_activit
 
         $data->register = $this->get_new_parentid('attendanceregister');
         $data->userid = $this->get_mappingid('user', $data->userid);
+        $data->addedbyuserid = $this->get_mappingid('user', $data->addedbyuserid);
 
         // Lookup RefCourse by ShortName, if exists on destination
         if ($data->refcourseshortname) {

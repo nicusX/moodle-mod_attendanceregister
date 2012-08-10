@@ -26,3 +26,4 @@ AttendanceRegister backup structure
 	- online
 	- refcourseshortname (determined from refcourse)
 	- comments
+        - addedbyuserid (annotation)

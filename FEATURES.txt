@@ -58,8 +58,10 @@ Student to log every off-classroom activity, including but not limited to online
 If bureaucracy needs a paper log too ;) a printable version is also available (see
 below)
 
-Note: Adding Offline Sessions is NOT allowed when another user (Admin) is "Logged
+Note 1: Adding Offline Sessions is NOT allowed when another user (Admin) is "Logged
 in as..." the tracked User.
+Note 2: Adding Offile Sessions for another user is allowed only with
+the mod/attendanceregister:addotherofflinesess capability (Denied by default)
 
 
 TRACKED COURSES
@@ -144,3 +146,8 @@ g) mod/attendanceregister:recalcsessions
    If a User may view other's Sessions ("mod/attendanceregister:viewotherregisters")
    may recalculate for all Users, otherwise may recalculate only his/her own
    sessions.
+h) mod/attendanceregister:addotherofflinesess
+   Default: Disabled for all
+   Allow submitting an Offline Session for another User
+   ("mod/attendanceregister:viewotherregisters" is also needed, to view the
+   other's session before deleting it)
