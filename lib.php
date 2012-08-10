@@ -176,6 +176,12 @@ function attendanceregister_update_instance($register) {
         $register->mandofflspeccourse = 0;
     }
 
+    // Check if any setting requiring recalculating Sessions has been changed
+    $oldRegister = $DB->get_record('attendanceregister', array('id' => $register->id) );
+    if ( $oldRegister &&  $oldRegister->sessiontimeout != $register->sessiontimeout ) {
+        $register->pendingrecalc = true;
+    }
+
     return $DB->update_record('attendanceregister', $register);
 }
 
