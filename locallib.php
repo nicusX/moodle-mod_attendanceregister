@@ -464,13 +464,25 @@ function attendanceregister__save_session($register, $userId, $loginTimestamp, $
 
 /**
  * Delete all online Sessions of a given User
+ * If $onlyDeleteAfter is specified, deletes only Sessions with login >= $onlyDeleteAfter
+ * (this is used not to delete calculated sessions older than the first available
+ * User's log entry)
  *
  * @param object $register
  * @param int $userId
+ * @param int $onlyDeleteAfter default ) null (=ignored)
  */
-function attendanceregister__delete_user_online_sessions($register, $userId) {
+function attendanceregister__delete_user_online_sessions($register, $userId, $onlyDeleteAfter = null) {
     global $DB;
-    $DB->delete_records('attendanceregister_session', array('userid' => $userId, 'register' => $register->id, 'online' => 1));
+    $params =  array('userid' => $userId, 'register' => $register->id, 'online' => 1);
+    if ( $onlyDeleteAfter ) {
+        $where = 'userid = :userid AND register = :register AND online = :online AND login >= :lowerlimit';
+        $params['lowerlimit'] = $onlyDeleteAfter;
+        $DB->delete_records_select('attendanceregister_session', $where, $params);
+    } else {
+        // If no lower delete limit has been specified, deletes all User's Sessions
+        $DB->delete_records('attendanceregister_session', $params);
+    }
 }
 
 /**
@@ -483,6 +495,21 @@ function attendanceregister__delete_user_aggregates($register, $userId) {
     $DB->delete_records('attendanceregister_aggregate', array('userid' => $userId, 'register' => $register->id));
 }
 
+
+/**
+ * Retrieve the timestamp of the oldest Log Entry of a User
+ * Please not that this is the oldest log entry in the site, not only in tracked courses.
+ * @param int $userId
+ * @return int or null if no log entry found
+ */
+function attendanceregister__get_user_oldest_log_entry_timestamp($userId) {
+    global $DB;
+    $obj = $DB->get_record_sql('SELECT MIN(time) as oldestlogtime FROM {log} WHERE userid = :userid', array( 'userid' => $userId ), IGNORE_MISSING );
+    if ( $obj ) {
+        return $obj->oldestlogtime;
+    }
+    return null;
+}
 
 /**
  * Check if a Lock exists on a given User's Register
