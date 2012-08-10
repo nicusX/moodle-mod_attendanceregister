@@ -62,11 +62,12 @@ $string['onlyrealusercandeleteofflinesessions'] = 'Only real user may delete off
 
 // Capabilities
 $string['attendanceregister:tracked'] = "Is tracked by Attendance Register";
-$string['attendanceregister:viewownregister'] = "Can view his/her own Attendance Register entries";
-$string['attendanceregister:viewotherregisters'] = "Can view others' Attendance Register entries";
+$string['attendanceregister:viewownregister'] = "Can view his/her own Attendance Registers";
+$string['attendanceregister:viewotherregisters'] = "Can view other people's Attendance Registers";
 $string['attendanceregister:addownofflinesess'] = "Can add Offline Sessions on his/her own Register";
+$string['attendanceregister:addotherofflinesess'] = "Can add Offline Sessions on other people's Register";
 $string['attendanceregister:deleteownofflinesess'] = "Can delete Offline Sessions from his/her own Register";
-$string['attendanceregister:deleteotherofflinesess'] = "Can delete other's Offline Sessions";
+$string['attendanceregister:deleteotherofflinesess'] = "Can delete Offline Sessions on other people's Register";
 $string['attendanceregister:recalcsessions'] = "Can force Attendance Register's Sessions recalculations";
 
 // Buttons & Links labels
@@ -119,6 +120,8 @@ $string['online'] = 'Online';
 $string['offline'] = 'Offline';
 $string['not_specified'] = '(not specified)';
 $string['never'] = '(never)';
+$string['session_added_by_another_user'] = 'Added by: {$a}';
+$string['unknown'] = '(unknown)';
 
 $string['are_you_sure_to_delete_offline_session'] = 'Are you sure to delete this offline Session?';
 $string['online_session_updated'] = "Online Sessions updated";

@@ -71,9 +71,16 @@ if (!($context = get_context_instance(CONTEXT_MODULE, $cm->id))) {
 $userCapabilities = new attendanceregister_user_capablities($context);
 
 // If $userId is 0 and the current user has not the capability required to view others
-// or if he is saving an offline Session,
 // force viewing his own register
-if ( $inputAction == ATTENDANCEREGISTER_ACTION_SAVE_OFFLINE_SESSION || (!$userId && !$userCapabilities->canViewOtherRegisters) ) {
+if ( !$userId && !$userCapabilities->canViewOtherRegisters ) {
+    $userId = $USER->id;
+}
+
+// If a user is saving an Offline Session and has no capability so save it for others,
+// (or if user can save other's offline session but userId has not been specified)
+// force saving on his onw register
+if ( $inputAction == ATTENDANCEREGISTER_ACTION_SAVE_OFFLINE_SESSION
+        && (!$userCapabilities->canAddOtherOfflineSessions || !$userId ) ) {
     $userId = $USER->id;
 }
 
@@ -83,7 +90,7 @@ if ( $inputAction == ATTENDANCEREGISTER_ACTION_SAVE_OFFLINE_SESSION || (!$userId
 // ==================================================
 /// These capabilities checks block the page execution if failed
 // Requires capabilities to view own or others' register
-if ($userId == $USER->id) {
+if ( $userCapabilities->itsMe($userId) ) {
     require_capability(ATTENDANCEREGISTER_CAPABILITY_VIEW_OWN_REGISTERS, $context);
 } else {
     require_capability(ATTENDANCEREGISTER_CAPABILITY_VIEW_OTHER_REGISTERS, $context);
@@ -96,26 +103,32 @@ if ($inputAction == ATTENDANCEREGISTER_ACTION_RECALCULATE) {
     $doRecalculate = true;
 }
 
-
-/// Check if User has capabilities to Save Own Offline Session
-/// and determine if save Offline Session action has been called (and is allowed)
-// If ATTENDANCEREGISTER_ACTION_SAVE_OFFLINE_SESSION == false, saving Self.Cert
-// is allowed only to real-users and for himself only
-$doShowOfflineSessionForm = false;
-$doSaveOfflineSession = false;
-if ((!session_is_loggedinas() || ATTENDANCEREGISTER_ALLOW_LOGINAS_OFFLINE_SESSIONS) && $USER->id == $userId) {
-    $doShowOfflineSessionForm = $userCapabilities->canAddOwnOfflineSessions;
-
-    // Saving new offline session?
-    if ($inputAction == ATTENDANCEREGISTER_ACTION_SAVE_OFFLINE_SESSION && $userId && $register->offlinesessions) {
-        $doSaveOfflineSession = true;
-    }
-}
-
 // Printable version?
 $doShowPrintableVersion = false;
 if ($inputAction == ATTENDANCEREGISTER_ACTION_PRINTABLE) {
     $doShowPrintableVersion = true;
+}
+
+/// Check permissions and ownership for showing offline session form or saving them
+$doShowOfflineSessionForm = false;
+$doSaveOfflineSession = false;
+// Only if Offline Sessions are enabled (and No printable-version action)
+if ( $register->offlinesessions &&  !$doShowPrintableVersion  ) {
+    // Only if User is NOT logged-in-as, or ATTENDANCEREGISTER_ALLOW_LOGINAS_OFFLINE_SESSIONS is enabled
+    if ( !session_is_loggedinas() || ATTENDANCEREGISTER_ALLOW_LOGINAS_OFFLINE_SESSIONS ) {
+        // If user is on his own Register and may save own Sessions
+        // or is on other's Register and may save other's Sessions..
+        if ( $userCapabilities->canAddThisUserOfflineSession($register, $userId) ) {
+            // Do show Offline Sessions Form
+            $doShowOfflineSessionForm = true;
+
+            // If action is saving Offline Session...
+            if ( $inputAction == ATTENDANCEREGISTER_ACTION_SAVE_OFFLINE_SESSION && $userId ) {
+                // Do save Offline Session
+                $doSaveOfflineSession = true;
+            }
+        }
+    }
 }
 
 
@@ -126,7 +139,7 @@ if ($sessionToDelete) {
     // Check if logged-in-as Session Delete
     if (session_is_loggedinas() && !ATTENDANCEREGISTER_ACTION_SAVE_OFFLINE_SESSION) {
         print_error('onlyrealusercandeleteofflinesessions', 'attendanceregister');
-    } else if ($sessionToDelete->userid == $USER->id) {
+    } else if ( $userCapabilities->itsMe($sessionToDelete->userid) ) {
         require_capability(ATTENDANCEREGISTER_CAPABILITY_DELETE_OWN_OFFLINE_SESSIONS, $context);
         $doDeleteOfflineSession = true;
     } else {
@@ -205,7 +218,11 @@ $mform = null;
 if ($doShowOfflineSessionForm && !$doShowPrintableVersion) {
 
     // Prepare Form
-    $customFormData = array('register' => $register, 'courses' => $userSessions->trackedCourses->courses );
+    $customFormData = array('register' => $register,'courses' => $userSessions->trackedCourses->courses);
+    // Also pass userId only if is saving for another user
+    if ($USER->id != $userId) {
+        $customFormData['userId'] = $userId;
+    }
     $mform = new mod_attendanceregister_selfcertification_edit_form(null, $customFormData);
 
 
@@ -215,8 +232,7 @@ if ($doShowOfflineSessionForm && !$doShowPrintableVersion) {
         redirect($PAGE->url);
     } else if ($doSaveOfflineSession && ($formData = $mform->get_data())) {
         // Save Session
-        $userId = $USER->id; // User is always current User!
-        attendanceregister_save_offline_session($register, $userId, $formData);
+        attendanceregister_save_offline_session($register, $formData);
 
         // Notification & Continue button
         echo $OUTPUT->notification(get_string('offline_session_saved', 'attendanceregister'), 'notifysuccess');

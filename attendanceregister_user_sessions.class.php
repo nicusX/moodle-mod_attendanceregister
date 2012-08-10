@@ -121,7 +121,6 @@ class attendanceregister_user_sessions {
                 $duration = attendanceregister_format_duration($session->duration);
 
                 // Basic columns
-//                $tableRow = new html_table_row( array($rowcountStr, userdate($session->login), userdate($session->logout), $duration) );
                 $tableRow = new html_table_row( array($rowcountStr, attendanceregister__formatDateTime($session->login), attendanceregister__formatDateTime($session->logout), $duration) );
 
                 // Add class for zebra stripes
@@ -132,6 +131,14 @@ class attendanceregister_user_sessions {
 
                     // Offline/Online
                     $onlineOfflineStr = (($session->online) ? $stronline : $stroffline);
+
+                    // if saved by other
+                    if ( $session->addedbyuserid ) {
+                        // Retrieve the other user, if any, or unknown
+                        $a = attendanceregister__otherUserFullnameOrUnknown($session->addedbyuserid);
+                        $addedByStr = get_string('session_added_by_another_user', 'attendanceregister', $a);
+                        $onlineOfflineStr = html_writer::tag('a', $onlineOfflineStr . '*', array('title'=>$addedByStr, 'class'=>'addedbyother') );
+                    }
                     $tableCell = new html_table_cell($onlineOfflineStr);
                     $tableCell->attributes['class'] .=  ( ($session->online)?' online_label':' offline_label' );
                     $tableRow->cells[] = $tableCell;

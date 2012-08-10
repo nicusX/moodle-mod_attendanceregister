@@ -25,7 +25,20 @@ function xmldb_attendanceregister_upgrade($oldversion) {
 
     $dbman = $DB->get_manager();
 
-    // No Upgrade by now
+    if ($oldversion < 2012081003) {
+        // Add attendanceregister_session.addedbyuserid column
+
+        // Define field addedbyuser to be added to attendanceregister_session
+        $table = new xmldb_table('attendanceregister_session');
+        $field = new xmldb_field('addedbyuserid', XMLDB_TYPE_INTEGER, '10', XMLDB_UNSIGNED );
+
+        // Launch add field addedbyuserid
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        upgrade_mod_savepoint(true, 2012081003, 'attendanceregister');
+    }
 
     return true;
 }

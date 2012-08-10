@@ -394,18 +394,20 @@ function attendanceregister__get_user_log_entries_in_courses($userId, $fromTime,
  * @param int $logout
  * @return boolean true if overlapping
  */
-function attendanceregister__check_overlapping_old_sessions($register, $user, $login, $logout) {
+function attendanceregister__check_overlapping_old_sessions($register, $userId, $login, $logout) {
     global $DB;
 
     $select = 'userid = :userid AND register = :registerid AND (:login BETWEEN login AND logout) OR (:logout BETWEEN login AND logout)';
-    $params = array( 'userid' => $user->id, 'registerid' => $register->id, 'login' => $login, 'logout' => $logout );
+    $params = array( 'userid' => $userId, 'registerid' => $register->id, 'login' => $login, 'logout' => $logout );
 
     return $DB->record_exists_select('attendanceregister_session', $select, $params);
 }
 
 /**
  * Checks if a given login-logout overlap overlap the current User's session
- * (Just checks if logout is after User's Last Login)
+ * If the user is the current user, just checks if logout is after User's Last Login
+ * If is another user, if user's lastaccess is older then sessiontimeout he is supposed to be logged out
+ *
  *
  * @param object $register
  * @param object $user
@@ -413,9 +415,25 @@ function attendanceregister__check_overlapping_old_sessions($register, $user, $l
  * @param int $logout
  * @return boolean true if overlapping
  */
-function attendanceregister__check_overlapping_current_session($register, $user, $login, $logout) {
+function attendanceregister__check_overlapping_current_session($register, $userId, $login, $logout) {
+    global $USER, $DB;
+    if ( $USER->id == $userId ) {
+        $user = $USER;
+    } else {
+        $user = $DB->get_record('user', array('id' => $userId));
+        // If user never logged in, no overlapping could happens
+        if ( !$user->lastaccess ) {
+            return false;
+        }
 
+        // If user lastaccess is older than sessiontimeout, the user is supposed to be logged out and no check is done
+        $sessionTimeoutSeconds = $register->sessiontimeout * 60;
+        if ( !$user->lastaccess < (time() - $sessionTimeoutSeconds))  {
+            return false;
+        }
+    }
     return ( $user->currentlogin < $logout );
+
 }
 
 /**
@@ -590,6 +608,20 @@ function attendanceregister__formatDateTime($dateTime) {
 }
 
 /**
+ * Return
+ * @param type $otherUserId
+ */
+function attendanceregister__otherUserFullnameOrUnknown($otherUserId) {
+    global $DB;
+    $otherUser = $DB->get_record('user', array('id' => $otherUserId));
+    if ( $otherUser ) {
+        return fullname($otherUser);
+    } else {
+        return get_string('unknown', 'attendanceregister');
+    }
+}
+
+/**
  * Class form Offline Session Self-Certification form
  * (Note that the User is always the CURRENT user ($USER) )
  */
@@ -603,6 +635,11 @@ class mod_attendanceregister_selfcertification_edit_form extends moodleform {
 
         $register = $this->_customdata['register'];
         $courses = $this->_customdata['courses'];
+        if ( isset(  $this->_customdata['userId'] )) {
+            $userId = $this->_customdata['userId'];
+        } else {
+            $userId = null;
+        }
 
         // Login/Logout defaults
         // based on User's LastLogin:
@@ -671,6 +708,12 @@ class mod_attendanceregister_selfcertification_edit_form extends moodleform {
         $mform->setType('action', PARAM_ACTION);
         $mform->setDefault('action',  ATTENDANCEREGISTER_ACTION_SAVE_OFFLINE_SESSION);
 
+        // Add userid hidden param if needed
+        if ($userId) {
+            $mform->addElement('hidden', 'userid');
+            $mform->setType('userid', PARAM_INT);
+            $mform->setDefault('userid', $userId);
+        }
 
 
         // buttons
@@ -687,6 +730,11 @@ class mod_attendanceregister_selfcertification_edit_form extends moodleform {
 
         $login = $data['login'];
         $logout = $data['logout'];
+        if ( isset($data['userid']) ) {
+            $userId = $data['userid'];
+        } else {
+           $userId = $USER->id;
+        }
 
         // Check if login is before logout
         if ( ($logout - $login ) <= 0  ) {
@@ -710,12 +758,12 @@ class mod_attendanceregister_selfcertification_edit_form extends moodleform {
         }
 
         // Check if login-logout overlap any saved session
-        if (attendanceregister__check_overlapping_old_sessions($register, $USER, $login, $logout) ) {
+        if (attendanceregister__check_overlapping_old_sessions($register, $userId, $login, $logout) ) {
             $errors['login'] = get_string('overlaps_old_sessions', 'attendanceregister');
         }
 
         // Check if login-logout overlap current User session
-        if (attendanceregister__check_overlapping_current_session($register, $USER, $login, $logout)) {
+        if (attendanceregister__check_overlapping_current_session($register, $userId, $login, $logout)) {
             $errors['login'] = get_string('overlaps_current_session', 'attendanceregister');
         }
 
@@ -733,6 +781,7 @@ class attendanceregister_user_capablities {
     public $canViewOwnRegister = false;
     public $canViewOtherRegisters = false;
     public $canAddOwnOfflineSessions = false;
+    public $canAddOtherOfflineSessions = false;
     public $canDeleteOwnOfflineSessions = false;
     public $canDeleteOtherOfflineSessions = false;
     public $canRecalcSessions = false;
@@ -746,7 +795,8 @@ class attendanceregister_user_capablities {
         $this->canViewOtherRegisters = has_capability(ATTENDANCEREGISTER_CAPABILITY_VIEW_OTHER_REGISTERS, $context, null, true);
         $this->canRecalcSessions = has_capability(ATTENDANCEREGISTER_CAPABILITY_RECALC_SESSIONS, $context, null, true);
         $this->isTracked =  has_capability(ATTENDANCEREGISTER_CAPABILITY_TRACKED, $context, null, false); // Ignore doAnything
-        $this->canAddOwnOfflineSessions = has_capability(ATTENDANCEREGISTER_CAPABILITY_ADD_OWN_OFFLINE_SESSION, $context, null, false);  // Ignore doAnything
+        $this->canAddOwnOfflineSessions = has_capability(ATTENDANCEREGISTER_CAPABILITY_ADD_OWN_OFFLINE_SESSIONS, $context, null, false);  // Ignore doAnything
+        $this->canAddOtherOfflineSessions = has_capability(ATTENDANCEREGISTER_CAPABILITY_ADD_OTHER_OFFLINE_SESSIONS, $context, null, false);  // Ignore doAnything
         $this->canDeleteOwnOfflineSessions = has_capability(ATTENDANCEREGISTER_CAPABILITY_DELETE_OWN_OFFLINE_SESSIONS, $context, null, false);  // Ignore doAnything
         $this->canDeleteOtherOfflineSessions = has_capability(ATTENDANCEREGISTER_CAPABILITY_DELETE_OTHER_OFFLINE_SESSIONS, $context, null, false);  // Ignore doAnything
     }
@@ -770,8 +820,31 @@ class attendanceregister_user_capablities {
         return ( $this->canDeleteOtherOfflineSessions || ( $this->canDeleteOwnOfflineSessions && $this->itsMe($userId) )   );
     }
 
+    /**
+     * Check if the current USER can add Offline Sessions for a specified User
+     * @param int $userId
+     * @return boolean
+     */
+    public function canAddThisUserOfflineSession($register, $userId) {
+        global $DB;
 
-    private function itsMe($userId) {
+        if ( $this->itsMe($userId) ) {
+            return  $this->canAddOwnOfflineSessions;
+        } else if ( $this->canAddOtherOfflineSessions ) {
+            // If adding Session for another user also check it is tracked by the register instance
+            $user = $DB->get_record('user', array('id'=>$userId));
+            return attendanceregister_is_tracked_user($register, $user);
+        }
+        return false;
+    }
+
+    /**
+     * Shortcut for avoid checking $userId == $USER->id
+     * @global object $USER
+     * @param int $userId
+     * @return boolean
+     */
+    public function itsMe($userId) {
         global $USER;
         return ($userId && ($userId == $USER->id) );
     }

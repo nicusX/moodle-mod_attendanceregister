@@ -32,6 +32,8 @@
 .attendanceregister_sessionlist .online_label { }
 .attendanceregister_sessionlist .offline_label { color: blue; }
 .attendanceregister_sessionlist .lastrow { border-bottom: 1px solid #C0C0C0; }
+/* Highlight Offline Sessions added by others */
+.attendanceregister_sessionlist .addedbyother { text-decoration: underline; }
 
 /* Zebra stripes */
 .attendanceregister_sessionlist .attendanceregister_evenrow,
@@ -76,4 +78,7 @@
 
     /* Clean up links */
     a:link, a:visited {color: black; text-decoration: none;}
+
+    /* Offline Sessions by other Users */
+    .attendanceregister_sessionlist .addedbyother { text-decoration: underline; }
 }

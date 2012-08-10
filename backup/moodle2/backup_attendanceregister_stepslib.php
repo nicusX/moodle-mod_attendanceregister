@@ -33,7 +33,7 @@ class backup_attendanceregister_activity_structure_step extends backup_activity_
         $sessions = new backup_nested_element('sessions');
 
         $session = new backup_nested_element('session', array('id'),
-                array( 'userid', 'login', 'logout', 'duration', 'online', 'refcourseshortname', 'comments' ));
+                array( 'userid', 'login', 'logout', 'duration', 'online', 'refcourseshortname', 'comments', 'addedbyuserid' ));
 
         // Builds the tree
         $attendanceregister->add_child($sessions);
@@ -46,7 +46,8 @@ class backup_attendanceregister_activity_structure_step extends backup_activity_
         if ( $userinfo ) {
             $session->set_source_sql('
                 SELECT s.id, s.register, s.userid, s.login, s.logout, s.duration, s.online, s.comments,
-                    c.shortname AS refcourseshortname
+                    c.shortname AS refcourseshortname,
+                    s.addedbyuserid
                   FROM {attendanceregister_session} s LEFT JOIN {course} c ON c.id = s.refcourse
                   WHERE s.register = ? AND s.online = 0
                 ', array(backup::VAR_PARENTID));
@@ -54,6 +55,8 @@ class backup_attendanceregister_activity_structure_step extends backup_activity_
 
         // Define ID annotations
         $session->annotate_ids('user', 'userid');
+        $session->annotate_ids('user', 'addedbyuserid');
+
 
         // Define file annotations
         $attendanceregister->annotate_files('mod_attendanceregister', 'intro', null); // This file area hasn't itemid

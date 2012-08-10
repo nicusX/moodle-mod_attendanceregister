@@ -74,6 +74,7 @@ $string['attendanceregister:tracked'] = 'L\'attività dell\'Utente viene traccia
 $string['attendanceregister:viewownregister'] = 'Può visualizzare il proprio Registro Presenze';
 $string['attendanceregister:viewotherregisters'] = 'Può visualizzare i Registri Presenze di altri';
 $string['attendanceregister:addownofflinesess'] = 'Può aggiungere Sessioni Offline al proprio Registro Presenze';
+$string['attendanceregister:addotherofflinesess'] = "Può aggiungere Sessioni Offline al al Registro Presenze di altri Utenti";
 $string['attendanceregister:deleteownofflinesess'] = 'Può cancellare Sessioni Offline dal proprio Registro Presenze';
 $string['attendanceregister:deleteotherofflinesess'] = 'Può cancellare Sessioni Offline dal Resigistro Presenze di altri Utenti';
 $string['attendanceregister:recalcsessions'] = 'Può forzare il Ricalcolo delle Sessioni online del Registro Presenze';
@@ -127,6 +128,8 @@ $string['online'] = 'Online';
 $string['offline'] = 'Offline';
 $string['not_specified'] = '(non spec.)';
 $string['never'] = '(mai)';
+$string['session_added_by_another_user'] = 'Aggiunta da: {$a}';
+$string['unknown'] = '(sconosciuto)';
 
 $string['are_you_sure_to_delete_offline_session'] = 'Sei sicuro di voler cancellare questa Sessione?';
 $string['online_session_updated'] = "Sessioni online aggiornate";
