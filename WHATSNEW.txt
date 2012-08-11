@@ -1,0 +1,13 @@
+Attendance Register Module - What's New
+
+
+RELEASE 2.2.1 (2012081101)
+
+Fixes
+# Offline Sessions Form shown even if Offline Sessions are disabled
+# Recalculating sessions loose data if old Log Entries have been deleted
+
+New Features
+# New Capability: 'mod/attendanceregister:addotherofflinesess' allow to add Offline Sessions for other users
+# Sessions recalculation could be scheduled for execution on next Cron
+# If Session Timeout setting is changed, automatic recalculation is scheduled
