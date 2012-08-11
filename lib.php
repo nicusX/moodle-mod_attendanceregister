@@ -48,6 +48,7 @@ define("ATTENDANCEREGISTER_ACTION_PRINTABLE", "printable");
 define("ATTENDANCEREGISTER_ACTION_RECALCULATE", "recalc");
 define("ATTENDANCEREGISTER_ACTION_SAVE_OFFLINE_SESSION", "saveoffline");
 define("ATTENDANCEREGISTER_ACTION_DELETE_OFFLINE_SESSION", "deloffline");
+define("ATTENDANCEREGISTER_ACTION_SCHEDULERECALC", "schedrecalc");
 
 // Logging Actions
 define('ATTENDANCEREGISTER_LOGACTION_VIEW', 'view');
@@ -61,7 +62,8 @@ define('ATTENDANCEREGISTER_LOGACTION_RECALCULTATE', 'recalculate');
 define("ATTENDANCEREGISTER_CAPABILITY_TRACKED", "mod/attendanceregister:tracked");
 define("ATTENDANCEREGISTER_CAPABILITY_VIEW_OTHER_REGISTERS", "mod/attendanceregister:viewotherregisters");
 define("ATTENDANCEREGISTER_CAPABILITY_VIEW_OWN_REGISTERS", "mod/attendanceregister:viewownregister");
-define("ATTENDANCEREGISTER_CAPABILITY_ADD_OWN_OFFLINE_SESSION", "mod/attendanceregister:addownofflinesess");
+define("ATTENDANCEREGISTER_CAPABILITY_ADD_OWN_OFFLINE_SESSIONS", "mod/attendanceregister:addownofflinesess");
+define("ATTENDANCEREGISTER_CAPABILITY_ADD_OTHER_OFFLINE_SESSIONS", "mod/attendanceregister:addotherofflinesess");
 define("ATTENDANCEREGISTER_CAPABILITY_DELETE_OWN_OFFLINE_SESSIONS", "mod/attendanceregister:deleteownofflinesess");
 define("ATTENDANCEREGISTER_CAPABILITY_DELETE_OTHER_OFFLINE_SESSIONS", "mod/attendanceregister:deleteotherofflinesess");
 define("ATTENDANCEREGISTER_CAPABILITY_RECALC_SESSIONS", "mod/attendanceregister:recalcsessions");
@@ -172,6 +174,12 @@ function attendanceregister_update_instance($register) {
     }
     if (!isset($register->mandofflspeccourse)) {
         $register->mandofflspeccourse = 0;
+    }
+
+    // Check if any setting requiring recalculating Sessions has been changed
+    $oldRegister = $DB->get_record('attendanceregister', array('id' => $register->id) );
+    if ( $oldRegister &&  $oldRegister->sessiontimeout != $register->sessiontimeout ) {
+        $register->pendingrecalc = true;
     }
 
     return $DB->update_record('attendanceregister', $register);
@@ -297,7 +305,7 @@ function attendanceregister_get_extra_capabilities() {
         ATTENDANCEREGISTER_CAPABILITY_TRACKED,
         ATTENDANCEREGISTER_CAPABILITY_VIEW_OTHER_REGISTERS,
         ATTENDANCEREGISTER_CAPABILITY_VIEW_OWN_REGISTERS,
-        ATTENDANCEREGISTER_CAPABILITY_ADD_OWN_OFFLINE_SESSION,
+        ATTENDANCEREGISTER_CAPABILITY_ADD_OWN_OFFLINE_SESSIONS,
         ATTENDANCEREGISTER_CAPABILITY_DELETE_OTHER_OFFLINE_SESSIONS,
         ATTENDANCEREGISTER_CAPABILITY_RECALC_SESSIONS,
     );
@@ -316,11 +324,20 @@ function attendanceregister_cron() {
 
     $registers = $DB->get_records('attendanceregister');
 
-    // Updates online Sessions
     foreach ($registers as $register) {
+        // Updates online Sessions
         mtrace('Updating AttendanceRegister ID ' . $register->id);
         $nOfUpdates = attendanceregister_updates_all_users_sessions($register);
         mtrace($nOfUpdates . ' Users updated on Attendance Register ID ' . $register->id);
+
+        // Process pending recalculation
+        if ( $register->pendingrecalc ) {
+             mtrace('Recalculating AttendanceRegister ID ' . $register->id . '...');
+             attendanceregister_force_recalc_all($register);
+
+             // Reset pendingrecalc flag
+             attendanceregister_set_pending_recalc($register, false);
+        }
     }
 }
 
@@ -433,8 +450,11 @@ function attendanceregister_force_recalc_user_sessions($register, $userId, progr
 
     // If needed, delete old data [issue #14]
     if ( $deleteOldData ) {
+        // Retrieve the oldest User's log entry timestamp
+        $oldestLogEntryTime = attendanceregister__get_user_oldest_log_entry_timestamp($userId);
+
         // Delete all online Sessions of the given User in the Register
-        attendanceregister__delete_user_online_sessions($register, $userId);
+        attendanceregister__delete_user_online_sessions($register, $userId, $oldestLogEntryTime);
 
         // Delete aggregates if needed [issue #14]
         attendanceregister__delete_user_aggregates($register, $userId);
@@ -450,7 +470,7 @@ function attendanceregister_force_recalc_user_sessions($register, $userId, progr
 /**
  * Force Recalculating all User's Sessions
  * Executes quietly (no Progress Bar)
- * (called after Restore)
+ * (called after Restore and by Cron)
  * @param object $register
  */
 function attendanceregister_force_recalc_all($register) {
@@ -559,6 +579,16 @@ function attendanceregister_get_tracked_users($register) {
 }
 
 /**
+ * Checks if a given User is tracked by a Register instance
+ */
+function attendanceregister_is_tracked_user($register, $user) {
+    $course = attendanceregister__get_register_course($register);
+    $context = get_context_instance(CONTEXT_COURSE, $course->id);
+
+    return has_capability(ATTENDANCEREGISTER_CAPABILITY_TRACKED, $context, $user);
+}
+
+/**
  * Retrieve all Courses tracked by this Register
  * @param object $register
  * @return array of Course
@@ -609,26 +639,30 @@ function attendanceregister_format_duration($duration, $default = null) {
  * Updates Aggregates after saving
  *
  * @param object $register
- * @param int $userId
  * @param array $formData
  */
-function attendanceregister_save_offline_session($register, $userId, $formData) {
-    global $DB;
+function attendanceregister_save_offline_session($register, $formData) {
+    global $DB, $USER;
 
     $session = new stdClass();
     $session->register = $register->id;
-    $session->userid = $userId;
+    // If a userid has not been set in the form (the user is saving in his own Register) use current $USER
+    $session->userid =  (isset($formData->userid))?($formData->userid):($USER->id);
     $session->online = 0;
     $session->login = $formData->login;
     $session->logout = $formData->logout;
     $session->duration = $formData->logout - $formData->login;
     $session->refcourse = (isset($formData->refcourse)) ? ($formData->refcourse) : null; // Hack needed as 0 is passed as refcourse if no refcourse has been selected
     $session->comments = $formData->comments;
+    // If saved for another user, record the current user
+    if ( $USER->id != $session->userid ) {
+        $session->addedbyuserid = $USER->id;
+    }
 
     $DB->insert_record('attendanceregister_session', $session);
 
     // Update aggregates
-    attendanceregister__update_user_aggregates($register, $userId);
+    attendanceregister__update_user_aggregates($register,  $session->userid );
 }
 
 /**
@@ -644,7 +678,17 @@ function attendanceregister_delete_offline_session($register, $userId, $sessionI
     attendanceregister__update_user_aggregates($register, $userId);
 }
 
-
+/**
+ * Updates pendingrecalc flag of a Register
+ *
+ * @global type $DB
+ * @param object $register
+ * @param boolea $pendingRecalc
+ */
+function attendanceregister_set_pending_recalc($register, $pendingRecalc) {
+    global $DB;
+    $DB->update_record_raw('attendanceregister', array( 'id'=>$register->id, 'pendingrecalc'=>$pendingRecalc) );
+}
 
 
 /**
@@ -713,4 +757,3 @@ function attendanceregister_add_to_log($register, $cmId, $action, $userId = null
     // Add Log Entry
     add_to_log($register->course, 'attendanceregister', $logAction, $logUrl, '', $cmId);
 }
-
