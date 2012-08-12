@@ -1,6 +1,6 @@
 Attendance Register Module - What's New
 
-RELEASE 2.3.1 [work in progress]
+RELEASE 2.3.1 (2012081202)
 Fixes
 * [#33] Incompatibilty with PostgreSQL on updating pendingRecalc flag
 * [#34] Error saving Offline Sessions if comments are disabled
@@ -13,6 +13,9 @@ New Features
 
 Minor Changes
 * Internal refactoring of view.php, removing some mess
+
+Others
+* Verified compatibility with Moodle 2.3.1+ (Build: 20120712)
 
 ### RELEASE 2.2.1 (2012081101)
 
