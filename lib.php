@@ -687,7 +687,7 @@ function attendanceregister_delete_offline_session($register, $userId, $sessionI
  */
 function attendanceregister_set_pending_recalc($register, $pendingRecalc) {
     global $DB;
-    $DB->update_record_raw('attendanceregister', array( 'id'=>$register->id, 'pendingrecalc'=>$pendingRecalc) );
+    $DB->update_record_raw('attendanceregister', array( 'id'=>$register->id, 'pendingrecalc'=>($pendingRecalc?1:0) ) );
 }
 
 
