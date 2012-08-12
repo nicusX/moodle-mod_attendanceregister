@@ -50,7 +50,7 @@
 
 /* Print media styles */
 @media print {
-    body {background: white; font-size: 10pt; }
+    body.path-mod-attendanceregister {background: white; font-size: 10pt; color: black; }
 
     /* Hide buttons and action_icons */
     .attendanceregister_buttonbar, .action-icon {display: none;}
@@ -77,7 +77,7 @@
     table.attendanceregister_usersummary thead {display: table-header-group;}
 
     /* Clean up links */
-    a:link, a:visited {color: black; text-decoration: none;}
+   .path-mod-attendanceregister a:link, a:visited {color: black; text-decoration: none;}
 
     /* Offline Sessions by other Users */
     .attendanceregister_sessionlist .addedbyother { text-decoration: underline; }

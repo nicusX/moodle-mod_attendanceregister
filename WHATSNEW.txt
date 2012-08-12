@@ -4,10 +4,14 @@ RELEASE 2.3.1 [work in progress]
 Fixes
 * [#33] Incompatibilty with PostgreSQL on updating pendingRecalc flag
 * [#34] Error saving Offline Sessions if comments are disabled
-
-Minor Changes
+* Removed some PHP warning (normally not shown if debug=off)
 * Capability explicitely checked when saving an Offiline Session, so an error is
   thrown if a security violation occurs (previously it just didn't save)
+
+New Features
+* [#27] Recalculation buttons have been moved to the Settings menu
+
+Minor Changes
 * Internal refactoring of view.php, removing some mess
 
 ### RELEASE 2.2.1 (2012081101)

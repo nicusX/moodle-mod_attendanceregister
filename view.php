@@ -324,7 +324,7 @@ else if ($doShowContents && $doDeleteOfflineSession) {
 else if ($doShowContents) {
 
     //// Show User's Sessions
-    if ($userToProcess) {
+    if ($userId) {
 
         /// Update sessions
 
@@ -344,12 +344,12 @@ else if ($doShowContents) {
         /// Button bar
 
         echo $OUTPUT->container_start('attendanceregister_buttonbar');
-        // Recalculate this User's Sessions (if allowed & !printable )
-        if ($userCapabilities->canRecalcSessions && !$doShowPrintableVersion) {
-            echo $OUTPUT->help_icon('force_recalc_user_session', 'attendanceregister');
-            $linkUrl = attendanceregister_makeUrl($register, $userId, null, ATTENDANCEREGISTER_ACTION_RECALCULATE);
-            echo $OUTPUT->single_button($linkUrl, get_string('force_recalc_user_session', 'attendanceregister'), 'get');
-        }
+//        // Recalculate this User's Sessions (if allowed & !printable )
+//        if ($userCapabilities->canRecalcSessions && !$doShowPrintableVersion) {
+//            echo $OUTPUT->help_icon('force_recalc_user_session', 'attendanceregister');
+//            $linkUrl = attendanceregister_makeUrl($register, $userId, null, ATTENDANCEREGISTER_ACTION_RECALCULATE);
+//            echo $OUTPUT->single_button($linkUrl, get_string('force_recalc_user_session', 'attendanceregister'), 'get');
+//        }
         // Printable version button or Back to normal version
         $linkUrl = attendanceregister_makeUrl($register, $userId, null, ( ($doShowPrintableVersion) ? (null) : (ATTENDANCEREGISTER_ACTION_PRINTABLE)));
         echo $OUTPUT->single_button($linkUrl, (($doShowPrintableVersion) ? (get_string('back_to_normal', 'attendanceregister')) : (get_string('show_printable', 'attendanceregister'))), 'get');
@@ -386,19 +386,25 @@ else if ($doShowContents) {
     else {
 
         /// Button bar
-        echo $OUTPUT->container_start('attendanceregister_buttonbar');
-        // Recalculate Sessions button (only if allowed & !printable)
-        if ($userCapabilities->canRecalcSessions && !$doShowPrintableVersion) {
-            echo $OUTPUT->help_icon('force_recalc_all_session', 'attendanceregister');
-            $linkUrl = attendanceregister_makeUrl($register, null, null, ATTENDANCEREGISTER_ACTION_RECALCULATE);
-            echo $OUTPUT->single_button($linkUrl, get_string('force_recalc_all_session_now', 'attendanceregister'), 'get');
-            if ( !$register->pendingrecalc ) {
-                $linkUrl = attendanceregister_makeUrl($register, null, null, ATTENDANCEREGISTER_ACTION_SCHEDULERECALC);
-                echo $OUTPUT->single_button($linkUrl, get_string('schedule_reclalc_all_session', 'attendanceregister'), 'get');
-            } else {
-                echo $OUTPUT->single_button('', get_string('scheduled_recalc_pending', 'attendanceregister'), 'get', array('disabled'=>true));
-            }
+        // Show Recalc pending warning
+        if ( $register->pendingrecalc && $userCapabilities->canRecalcSessions && !$doShowPrintableVersion ) {
+            echo $OUTPUT->notification( get_string('recalc_scheduled_on_next_cron', 'attendanceregister')  );
         }
+
+        echo $OUTPUT->container_start('attendanceregister_buttonbar');
+//        // Recalculate Sessions button (only if allowed & !printable)
+//        if ($userCapabilities->canRecalcSessions && !$doShowPrintableVersion) {
+//            echo $OUTPUT->help_icon('force_recalc_all_session', 'attendanceregister');
+//            $linkUrl = attendanceregister_makeUrl($register, null, null, ATTENDANCEREGISTER_ACTION_RECALCULATE);
+//            echo $OUTPUT->single_button($linkUrl, get_string('force_recalc_all_session_now', 'attendanceregister'), 'get');
+//            if ( !$register->pendingrecalc ) {
+//                $linkUrl = attendanceregister_makeUrl($register, null, null, ATTENDANCEREGISTER_ACTION_SCHEDULERECALC);
+//                echo $OUTPUT->single_button($linkUrl, get_string('schedule_reclalc_all_session', 'attendanceregister'), 'get');
+//            } else {
+//                echo $OUTPUT->single_button('', get_string('recalc_scheduled_on_next_cron', 'attendanceregister'), 'get', array('disabled'=>true));
+//            }
+//        }
+
 
         // Printable version button or Back to normal version
         $linkUrl = attendanceregister_makeUrl($register, null, null, ( ($doShowPrintableVersion) ? (null) : (ATTENDANCEREGISTER_ACTION_PRINTABLE)));
