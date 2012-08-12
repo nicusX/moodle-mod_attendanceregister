@@ -90,7 +90,7 @@ if ( $inputAction == ATTENDANCEREGISTER_ACTION_SAVE_OFFLINE_SESSION
 // ==================================================
 /// These capabilities checks block the page execution if failed
 // Requires capabilities to view own or others' register
-if ( $userCapabilities->itsMe($userId) ) {
+if ( attendanceregister__isCurrentUser($userId) ) {
     require_capability(ATTENDANCEREGISTER_CAPABILITY_VIEW_OWN_REGISTERS, $context);
 } else {
     require_capability(ATTENDANCEREGISTER_CAPABILITY_VIEW_OTHER_REGISTERS, $context);
@@ -130,6 +130,13 @@ if ( $register->offlinesessions &&  !$doShowPrintableVersion  ) {
 
             // If action is saving Offline Session...
             if ( $inputAction == ATTENDANCEREGISTER_ACTION_SAVE_OFFLINE_SESSION && $userId ) {
+                // Check Capabilities, to show an error if a security violation attempt occurs
+                if ( attendanceregister__isCurrentUser($userId) ) {
+                    require_capability(ATTENDANCEREGISTER_CAPABILITY_ADD_OWN_OFFLINE_SESSIONS, $context);
+                } else {
+                    require_capability(ATTENDANCEREGISTER_CAPABILITY_ADD_OTHER_OFFLINE_SESSIONS, $context);
+                }
+
                 // Do save Offline Session
                 $doSaveOfflineSession = true;
             }
@@ -145,7 +152,7 @@ if ($sessionToDelete) {
     // Check if logged-in-as Session Delete
     if (session_is_loggedinas() && !ATTENDANCEREGISTER_ACTION_SAVE_OFFLINE_SESSION) {
         print_error('onlyrealusercandeleteofflinesessions', 'attendanceregister');
-    } else if ( $userCapabilities->itsMe($sessionToDelete->userid) ) {
+    } else if ( attendanceregister__isCurrentUser($userId) ) {
         require_capability(ATTENDANCEREGISTER_CAPABILITY_DELETE_OWN_OFFLINE_SESSIONS, $context);
         $doDeleteOfflineSession = true;
     } else {

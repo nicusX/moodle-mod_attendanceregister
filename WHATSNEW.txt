@@ -1,13 +1,20 @@
 Attendance Register Module - What's New
 
+RELEASE 2.3.1 [work in progress]
+Fixes
+* [#33] Incompatibilty with PostgreSQL on updating pendingRecalc flag
 
-RELEASE 2.2.1 (2012081101)
+Minor Changes
+* Capability explicitely checked when saving an Offiline Session, so an error is
+  thrown if a security violation occurs (previously it just didn't save)
+
+### RELEASE 2.2.1 (2012081101)
 
 Fixes
-# Offline Sessions Form shown even if Offline Sessions are disabled
-# Recalculating sessions loose data if old Log Entries have been deleted
+* [#30] Offline Sessions Form shown even if Offline Sessions are disabled.
+* [#5] Recalculating sessions loose data if old Log Entries have been deleted.
 
 New Features
-# New Capability: 'mod/attendanceregister:addotherofflinesess' allow to add Offline Sessions for other users
-# Sessions recalculation could be scheduled for execution on next Cron
-# If Session Timeout setting is changed, automatic recalculation is scheduled
+* [#29] New Capability: 'mod/attendanceregister:addotherofflinesess' allow to add Offline Sessions for other users.
+* [#3] Sessions recalculation could be scheduled for execution on next Cron.
+* [#12] When Session Timeout setting is changed, automatic recalculation is scheduled.

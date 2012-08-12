@@ -522,7 +522,7 @@ function attendanceregister_check_user_sessions_need_update($register, $userId, 
     global $DB;
 
     // Retrive User
-    $user = $DB->get_record('user', array('id' => $userId));
+    $user = attendanceregister__getUser($userId);
 
     // Retrieve User's Grand Total Aggregate (if any)
     $userGrandTotalAggregate = attendanceregister__get_cached_user_grandtotal($register, $userId);

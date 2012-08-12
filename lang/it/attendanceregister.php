@@ -167,6 +167,7 @@ $string['duration_mm'] = '{$a->minutes} min';
 $string['select_a_course_if_any'] = '- Selezionare un Corso (opz.) -';
 $string['select_a_course'] = '- Selezionare un Corso -';
 $string['insert_new_offline_session'] = 'Inserisci una nuova Sessione Offline';
+$string['insert_new_offline_session_for_another_user'] = 'Inserisci una nuova Sessione Offline per {$a->fullname}';
 //$string['offline_session_form_explain'] = 'You may enter an offline session of work.<br/>
 //    The offline work time will be added to the online sessions automatically recorded by the Attendance Register.<br/>
 //    The new session may not overlap with any existing work session, either online or offline, nor it may be more than {$a->dayscertificable} days ago.<br/>

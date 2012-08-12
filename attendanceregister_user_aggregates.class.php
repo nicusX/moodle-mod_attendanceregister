@@ -75,7 +75,7 @@ class attendanceregister_user_aggregates  {
         $this->userSessions = $userSessions;
 
         // Retrieve User instance
-        $this->user = $DB->get_record('user', array('id' => $userId),'*', MUST_EXIST);
+        $this->user = attendanceregister__getUser($userId);
 
         // Retrieve attendanceregister_aggregate records
         $aggregates = attendanceregister__get_user_aggregates($register, $userId);

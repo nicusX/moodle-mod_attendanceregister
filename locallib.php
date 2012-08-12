@@ -70,7 +70,7 @@ function attendanceregister__build_new_user_sessions($register, $userId, $fromTi
 
     // Retrieve ID of Course containing Register
     $course = attendanceregister__get_register_course($register);
-    $user = $DB->get_record('user', array('id' => $userId));
+    $user = attendanceregister__getUser($userId);
 
     // All Courses where User's activities are tracked (Always contains current Course)
     $trackedCoursesIds = attendanceregister__get_tracked_courses_ids($register, $course);
@@ -420,7 +420,7 @@ function attendanceregister__check_overlapping_current_session($register, $userI
     if ( $USER->id == $userId ) {
         $user = $USER;
     } else {
-        $user = $DB->get_record('user', array('id' => $userId));
+        $user = attendanceregister__getUser($userId);
         // If user never logged in, no overlapping could happens
         if ( !$user->lastaccess ) {
             return false;
@@ -635,12 +635,33 @@ function attendanceregister__formatDateTime($dateTime) {
 }
 
 /**
+ * A shortcut for loading a User
+ * It the User does not exist, an error is thrown
+ * @param int $userId
+ */
+function attendanceregister__getUser($userId) {
+    global $DB;
+    return $DB->get_record('user', array('id' => $userId),'*', MUST_EXIST);
+}
+
+/**
+ * Check if a given User ID is of the currently logged user
+ * @global object $USER
+ * @param int $userId
+ * @return boolean
+ */
+function attendanceregister__isCurrentUser($userId) {
+    global $USER;
+    return ($USER->id == $userId);
+}
+
+/**
  * Return
  * @param type $otherUserId
  */
 function attendanceregister__otherUserFullnameOrUnknown($otherUserId) {
     global $DB;
-    $otherUser = $DB->get_record('user', array('id' => $otherUserId));
+    $otherUser = attendanceregister__getUser($otherUserId);
     if ( $otherUser ) {
         return fullname($otherUser);
     } else {
@@ -679,7 +700,14 @@ class mod_attendanceregister_selfcertification_edit_form extends moodleform {
 
 
         // Title
-        $mform->addElement('html','<h1>' . get_string('insert_new_offline_session', 'attendanceregister') . '</h1>');
+        if ( !$userId || $USER->id == $userId ) {
+            $titleStr =  get_string('insert_new_offline_session', 'attendanceregister');
+        } else {
+            $otherUser = attendanceregister__getUser($userId);
+            $a->fullname = fullname($otherUser);
+            $titleStr =  get_string('insert_new_offline_session_for_another_user', 'attendanceregister', $a);
+        }
+        $mform->addElement('html','<h2>' . $titleStr . '</h2>');
 
 //        // Explain
 //        $a = new stdClass();
@@ -835,7 +863,7 @@ class attendanceregister_user_capablities {
      * @return boolean
      */
     public function canViewThisUserRegister($userId) {
-        return ( $this->canViewOtherRegisters || ( $this->canViewOwnRegister && $this->itsMe($userId) ) );
+        return ( $this->canViewOtherRegisters || ( $this->canViewOwnRegister && attendanceregister__isCurrentUser($userId) ) );
     }
 
     /**
@@ -844,7 +872,7 @@ class attendanceregister_user_capablities {
      * @return boolean
      */
     public function canDeleteThisUserOfflineSession($userId) {
-        return ( $this->canDeleteOtherOfflineSessions || ( $this->canDeleteOwnOfflineSessions && $this->itsMe($userId) )   );
+        return ( $this->canDeleteOtherOfflineSessions || ( $this->canDeleteOwnOfflineSessions && attendanceregister__isCurrentUser($userId) )   );
     }
 
     /**
@@ -855,24 +883,13 @@ class attendanceregister_user_capablities {
     public function canAddThisUserOfflineSession($register, $userId) {
         global $DB;
 
-        if ( $this->itsMe($userId) ) {
+        if ( attendanceregister__isCurrentUser($userId) ) {
             return  $this->canAddOwnOfflineSessions;
         } else if ( $this->canAddOtherOfflineSessions ) {
             // If adding Session for another user also check it is tracked by the register instance
-            $user = $DB->get_record('user', array('id'=>$userId));
+            $user = attendanceregister__getUser($userId);
             return attendanceregister_is_tracked_user($register, $user);
         }
         return false;
-    }
-
-    /**
-     * Shortcut for avoid checking $userId == $USER->id
-     * @global object $USER
-     * @param int $userId
-     * @return boolean
-     */
-    public function itsMe($userId) {
-        global $USER;
-        return ($userId && ($userId == $USER->id) );
     }
 }
