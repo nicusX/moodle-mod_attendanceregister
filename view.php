@@ -48,14 +48,6 @@ if ($inputSessionId) {
     $sessionToDelete = attendanceregister_get_session($inputSessionId);
 }
 
-// =========================
-// Prepare PAGE URL
-// =========================
-
-$url = attendanceregister_makeUrl($register, $userId, $groupId, $inputAction);
-
-
-
 // ================================
 // Basic security checks
 // ================================
@@ -67,28 +59,23 @@ if (!($context = get_context_instance(CONTEXT_MODULE, $cm->id))) {
     print_error('badcontext');
 }
 
-// User's Capabilities
+// Preload User's Capabilities
 $userCapabilities = new attendanceregister_user_capablities($context);
 
-// If $userId is 0 and the current user has not the capability required to view others
-// force viewing his own register
-if ( !$userId && !$userCapabilities->canViewOtherRegisters ) {
+// If user is not defined AND the user has NOT the capability to view other's Register
+// force $userId to User's own ID
+if ( !$userId && !$userCapabilities->canViewOtherRegisters) {
     $userId = $USER->id;
 }
-
-// If a user is saving an Offline Session and has no capability so save it for others,
-// (or if user can save other's offline session but userId has not been specified)
-// force saving on his onw register
-if ( $inputAction == ATTENDANCEREGISTER_ACTION_SAVE_OFFLINE_SESSION
-        && (!$userCapabilities->canAddOtherOfflineSessions || !$userId ) ) {
-    $userId = $USER->id;
-}
+// (beyond this point, if $userId is specified means you are working on one User's Register
+//  if not you are viewing all users Sessions)
 
 
 // ==================================================
 // Determine Action and checks specific permissions
 // ==================================================
 /// These capabilities checks block the page execution if failed
+
 // Requires capabilities to view own or others' register
 if ( attendanceregister__isCurrentUser($userId) ) {
     require_capability(ATTENDANCEREGISTER_CAPABILITY_VIEW_OWN_REGISTERS, $context);
@@ -129,7 +116,7 @@ if ( $register->offlinesessions &&  !$doShowPrintableVersion  ) {
             $doShowOfflineSessionForm = true;
 
             // If action is saving Offline Session...
-            if ( $inputAction == ATTENDANCEREGISTER_ACTION_SAVE_OFFLINE_SESSION && $userId ) {
+            if ( $inputAction == ATTENDANCEREGISTER_ACTION_SAVE_OFFLINE_SESSION  ) {
                 // Check Capabilities, to show an error if a security violation attempt occurs
                 if ( attendanceregister__isCurrentUser($userId) ) {
                     require_capability(ATTENDANCEREGISTER_CAPABILITY_ADD_OWN_OFFLINE_SESSIONS, $context);
@@ -161,6 +148,47 @@ if ($sessionToDelete) {
     }
 }
 
+// ===========================
+// Retrieve data to be shown
+// ===========================
+
+// If viewing/updating one User's Register, load the user into $userToProcess
+// and retireve User's Sessions or retrieve the Register's Tracked Users
+// If viewing all Users load tracked user list
+$userToProcess = null;
+$userSessions = null;
+$trackedUsers = null;
+if ( $userId ) {
+    $userToProcess = attendanceregister__getUser($userId);
+    $userToProcessFullname = fullname($userToProcess);
+    $userSessions = new attendanceregister_user_sessions($register, $userId, $userCapabilities);
+} else {
+    $trackedUsers = new attendanceregister_tracked_users($register, $userCapabilities);
+}
+
+
+// ===========================
+// Pepare PAGE for rendering
+// ===========================
+// Setup PAGE
+$url = attendanceregister_makeUrl($register, $userId, $groupId, $inputAction);
+$PAGE->set_url($url->out());
+$PAGE->set_context($context);
+$titleStr = $course->shortname . ': ' . $register->name . ( ($userId) ? ( ': ' . $userToProcessFullname ) : ('') );
+$PAGE->set_title(format_string($titleStr));
+
+$PAGE->set_heading($course->fullname);
+if ($doShowPrintableVersion) {
+    $PAGE->set_pagelayout('print');
+}
+
+// Add User's Register Navigation node
+if ( $userToProcess ) {
+    $registerNavNode = $PAGE->navigation->find($cm->id, navigation_node::TYPE_ACTIVITY);
+    $userNavNode = $registerNavNode->add( $userToProcessFullname, $url );
+    $userNavNode->make_active();
+}
+
 
 // ==================================================
 // Logs User's action
@@ -176,46 +204,15 @@ attendanceregister_add_to_log($register, $cm->id, $inputAction, $userId, $groupI
 $completion = new completion_info($course);
 $completion->set_module_viewed($cm);
 // TODO add other Completition info
-// ===========================
-// Retrieve data to be shown
-// ===========================
-// If $userId is defined, retireve User's Sessions,
-// otherwise retrieve the Register's Tracked Users
-$userSessions = null;
-$trackedUsers = null;
-$userFullName = null;
-if ($userId) {
-    $userSessions = new attendanceregister_user_sessions($register, $userId, $userCapabilities);
-    $userFullName = fullname($userSessions->userAggregates->user);
-} else {
-    $trackedUsers = new attendanceregister_tracked_users($register, $userCapabilities);
-}
 
 
-// ===========================
-// Pepare PAGE for rendering
-// ===========================
-// Setup PAGE
-$PAGE->set_url($url->out());
-$PAGE->set_context($context);
-$titleStr = $course->shortname . ': ' . $register->name . ( ($userId) ? ( ': ' . $userFullName ) : ('') );
-$PAGE->set_title(format_string($titleStr));
 
-$PAGE->set_heading($course->fullname);
-if ($doShowPrintableVersion) {
-    $PAGE->set_pagelayout('popup');
-}
 
-// Add User's Register Navigation node
-if ( $userId ) {
-    $registerNavNode = $PAGE->navigation->find($cm->id, navigation_node::TYPE_ACTIVITY);
-    $userNavNode = $registerNavNode->add( $userFullName, $url );
-    $userNavNode->make_active();
-}
-
+// ==============================================
+// Start Page Rendering
+// ==============================================
 echo $OUTPUT->header();
-
-$headingStr = $register->name . ( ( $userId ) ? (': ' . fullname($userSessions->userAggregates->user) ) : ('') );
+$headingStr = $register->name . ( ( $userId ) ? (': ' . $userToProcessFullname ) : ('') );
 echo $OUTPUT->heading(format_string($headingStr));
 
 
@@ -228,12 +225,12 @@ echo $OUTPUT->heading(format_string($headingStr));
 // Note that the User is always the CURRENT User (no UserId param is passed by the form)
 $doShowContents = true;
 $mform = null;
-if ($doShowOfflineSessionForm && !$doShowPrintableVersion) {
+if ($userId && $doShowOfflineSessionForm && !$doShowPrintableVersion ) {
 
     // Prepare Form
     $customFormData = array('register' => $register,'courses' => $userSessions->trackedCourses->courses);
     // Also pass userId only if is saving for another user
-    if ($USER->id != $userId) {
+    if (!attendanceregister__isCurrentUser($userId)) {
         $customFormData['userId'] = $userId;
     }
     $mform = new mod_attendanceregister_selfcertification_edit_form(null, $customFormData);
@@ -257,16 +254,19 @@ if ($doShowOfflineSessionForm && !$doShowPrintableVersion) {
 //// Process Recalculate
 if ($doShowContents && ($doRecalculate||$doScheduleRecalc)) {
 
-    if ($userId) {
-        //// Recalculate Session for one User
+    //// Recalculate Session for one User
+    if ($userToProcess) {
         $progressbar = new progress_bar('recalcbar', 500, true);
         attendanceregister_force_recalc_user_sessions($register, $userId, $progressbar);
 
         // Reload User's Sessions
         $userSessions = new attendanceregister_user_sessions($register, $userId, $userCapabilities);
-    } else {
+    }
 
-        //// Schedule Recalculation
+    //// Recalculate (or schedule recalculation) of all User's Sessions
+    else {
+
+        //// Schedule Recalculation?
         if ( $doScheduleRecalc ) {
             // Set peding recalc, if set
             if ( !$register->pendingrecalc ) {
@@ -324,7 +324,7 @@ else if ($doShowContents && $doDeleteOfflineSession) {
 else if ($doShowContents) {
 
     //// Show User's Sessions
-    if ($userId) {
+    if ($userToProcess) {
 
         /// Update sessions
 

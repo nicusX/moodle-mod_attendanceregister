@@ -653,9 +653,9 @@ function attendanceregister_save_offline_session($register, $formData) {
     $session->logout = $formData->logout;
     $session->duration = $formData->logout - $formData->login;
     $session->refcourse = (isset($formData->refcourse)) ? ($formData->refcourse) : null; // Hack needed as 0 is passed as refcourse if no refcourse has been selected
-    $session->comments = $formData->comments;
+    $session->comments = (isset( $formData->comments)) ? $formData->comments : null;
     // If saved for another user, record the current user
-    if ( $USER->id != $session->userid ) {
+    if ( !attendanceregister__isCurrentUser( $session->userid ) ) {
         $session->addedbyuserid = $USER->id;
     }
 

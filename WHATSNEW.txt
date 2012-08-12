@@ -3,10 +3,12 @@ Attendance Register Module - What's New
 RELEASE 2.3.1 [work in progress]
 Fixes
 * [#33] Incompatibilty with PostgreSQL on updating pendingRecalc flag
+* [#34] Error saving Offline Sessions if comments are disabled
 
 Minor Changes
 * Capability explicitely checked when saving an Offiline Session, so an error is
   thrown if a security violation occurs (previously it just didn't save)
+* Internal refactoring of view.php, removing some mess
 
 ### RELEASE 2.2.1 (2012081101)
 

@@ -647,12 +647,12 @@ function attendanceregister__getUser($userId) {
 /**
  * Check if a given User ID is of the currently logged user
  * @global object $USER
- * @param int $userId
+ * @param int $userId (consider null as current user)
  * @return boolean
  */
 function attendanceregister__isCurrentUser($userId) {
     global $USER;
-    return ($USER->id == $userId);
+    return (!$userId || $USER->id == $userId);
 }
 
 /**
@@ -700,14 +700,14 @@ class mod_attendanceregister_selfcertification_edit_form extends moodleform {
 
 
         // Title
-        if ( !$userId || $USER->id == $userId ) {
+        if ( attendanceregister__isCurrentUser($userId) ) {
             $titleStr =  get_string('insert_new_offline_session', 'attendanceregister');
         } else {
             $otherUser = attendanceregister__getUser($userId);
             $a->fullname = fullname($otherUser);
             $titleStr =  get_string('insert_new_offline_session_for_another_user', 'attendanceregister', $a);
         }
-        $mform->addElement('html','<h2>' . $titleStr . '</h2>');
+        $mform->addElement('html','<h3>' . $titleStr . '</h3>');
 
 //        // Explain
 //        $a = new stdClass();
@@ -859,31 +859,33 @@ class attendanceregister_user_capablities {
     /**
      * Checks if the current user can view a given User's Register.
      *
-     * @param object $user
+     * @param int $userId (null means current user's register)
      * @return boolean
      */
     public function canViewThisUserRegister($userId) {
-        return ( $this->canViewOtherRegisters || ( $this->canViewOwnRegister && attendanceregister__isCurrentUser($userId) ) );
+        return ( ( (attendanceregister__isCurrentUser($userId)) && $this->canViewOwnRegister  )
+                || ($this->canViewOtherRegisters) );
     }
 
     /**
      * Checks if the current user can delete a given User's Offline Sessions
-     * @param int $userId
+     * @param int $userId (null means current user's register)
      * @return boolean
      */
     public function canDeleteThisUserOfflineSession($userId) {
-        return ( $this->canDeleteOtherOfflineSessions || ( $this->canDeleteOwnOfflineSessions && attendanceregister__isCurrentUser($userId) )   );
+        return ( ( (attendanceregister__isCurrentUser($userId))  &&  $this->canDeleteOwnOfflineSessions )
+                || ($this->canDeleteOtherOfflineSessions) );
     }
 
     /**
      * Check if the current USER can add Offline Sessions for a specified User
-     * @param int $userId
+     * @param int $userId (null means current user's register)
      * @return boolean
      */
     public function canAddThisUserOfflineSession($register, $userId) {
         global $DB;
 
-        if ( attendanceregister__isCurrentUser($userId) ) {
+        if (attendanceregister__isCurrentUser($userId) ) {
             return  $this->canAddOwnOfflineSessions;
         } else if ( $this->canAddOtherOfflineSessions ) {
             // If adding Session for another user also check it is tracked by the register instance
