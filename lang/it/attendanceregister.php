@@ -82,9 +82,10 @@ $string['attendanceregister:recalcsessions'] = 'Può forzare il Ricalcolo delle 
 // Buttons & Links labels
 $string['force_recalc_user_session'] = 'Forza Ricalcolo Sessioni online di questo Utente';
 $string['force_recalc_all_session'] = 'Forza Ricalcolo delle Sessioni online di tutti gli Utenti';
-$string['force_recalc_all_session_now'] = 'Ricalcolo Sessioni immediato';
-$string['schedule_reclalc_all_session'] = 'Programma ricalcolo Sessioni';
-$string['scheduled_recalc_pending'] = 'Il ricalcolo Sessioni è stato programmato';
+$string['force_recalc_all_session_now'] = 'Ricalcola Sessioni, ora';
+$string['schedule_reclalc_all_session'] = 'Ricalcolo Sessioni al prossimo Cron';
+$string['recalc_scheduled_on_next_cron'] = 'Il Ricalcolo Sessioni è programmato per il prossimo cron';
+$string['recalc_already_pending'] = '(Già programmato per il prossimo Cron)';
 $string['back_to_tracked_user_list'] = 'Torna alla lista degli Utenti';
 $string['recalc_complete'] = 'Ricalcolo Sessioni online completato';
 $string['recalc_scheduled'] = 'Il ricalcolo Sessioni è stato programmato. Verrà eseguito al prossimo Cron';
@@ -167,6 +168,7 @@ $string['duration_mm'] = '{$a->minutes} min';
 $string['select_a_course_if_any'] = '- Selezionare un Corso (opz.) -';
 $string['select_a_course'] = '- Selezionare un Corso -';
 $string['insert_new_offline_session'] = 'Inserisci una nuova Sessione Offline';
+$string['insert_new_offline_session_for_another_user'] = 'Inserisci una nuova Sessione Offline per {$a->fullname}';
 //$string['offline_session_form_explain'] = 'You may enter an offline session of work.<br/>
 //    The offline work time will be added to the online sessions automatically recorded by the Attendance Register.<br/>
 //    The new session may not overlap with any existing work session, either online or offline, nor it may be more than {$a->dayscertificable} days ago.<br/>

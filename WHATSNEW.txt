@@ -1,13 +1,29 @@
 Attendance Register Module - What's New
 
-
-RELEASE 2.2.1 (2012081101)
-
+RELEASE 2.3.1 (2012081202)
 Fixes
-# Offline Sessions Form shown even if Offline Sessions are disabled
-# Recalculating sessions loose data if old Log Entries have been deleted
+* [#33] Incompatibilty with PostgreSQL on updating pendingRecalc flag
+* [#34] Error saving Offline Sessions if comments are disabled
+* Removed some PHP warning (normally not shown if debug=off)
+* Capability explicitely checked when saving an Offiline Session, so an error is
+  thrown if a security violation occurs (previously it just didn't save)
 
 New Features
-# New Capability: 'mod/attendanceregister:addotherofflinesess' allow to add Offline Sessions for other users
-# Sessions recalculation could be scheduled for execution on next Cron
-# If Session Timeout setting is changed, automatic recalculation is scheduled
+* [#27] Recalculation buttons have been moved to the Settings menu
+
+Minor Changes
+* Internal refactoring of view.php, removing some mess
+
+Others
+* Verified compatibility with Moodle 2.3.1+ (Build: 20120712)
+
+### RELEASE 2.2.1 (2012081101)
+
+Fixes
+* [#30] Offline Sessions Form shown even if Offline Sessions are disabled.
+* [#5] Recalculating sessions loose data if old Log Entries have been deleted.
+
+New Features
+* [#29] New Capability: 'mod/attendanceregister:addotherofflinesess' allow to add Offline Sessions for other users.
+* [#3] Sessions recalculation could be scheduled for execution on next Cron.
+* [#12] When Session Timeout setting is changed, automatic recalculation is scheduled.

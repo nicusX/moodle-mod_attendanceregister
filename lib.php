@@ -341,6 +341,57 @@ function attendanceregister_cron() {
     }
 }
 
+
+/**
+ * Adds module specific settings to the settings block
+ *
+ * @param settings_navigation $settingsnav The settings navigation object
+ * @param navigation_node $booknode The node to add module settings to
+ * @return void
+ */
+function attendanceregister_extend_settings_navigation(settings_navigation $settingsnav, navigation_node $attendanceregisternode) {
+    global $PAGE, $USER;
+    if ($PAGE->cm->modname !== 'attendanceregister') {
+        return;
+    }
+    if (empty($PAGE->cm->context)) {
+        $PAGE->cm->context = get_context_instance(CONTEXT_MODULE, $PAGE->cm->instance);
+    }
+
+    $register = $PAGE->activityrecord;
+    $params = $PAGE->url->params();
+    $userCapabilities = new attendanceregister_user_capablities($PAGE->cm->context);
+
+    // Add Recalc menu entries to Settings Menu
+    if ( $userCapabilities->canRecalcSessions ) {
+        if ( !empty($params['userid']) || !$userCapabilities->canViewOtherRegisters ) {
+            // Single User view
+            $userId = clean_param($params['userid'], PARAM_INT);
+            $linkUrl = attendanceregister_makeUrl($register, $userId, null, ATTENDANCEREGISTER_ACTION_RECALCULATE);
+            $menuEntryStr = get_string('force_recalc_user_session', 'attendanceregister');
+            $attendanceregisternode->add($menuEntryStr, $linkUrl, navigation_node::TYPE_SETTING);
+
+        } else {
+            // All Users view
+
+            $linkUrl = attendanceregister_makeUrl($register, null, null, ATTENDANCEREGISTER_ACTION_RECALCULATE);
+            $menuEntryStr = get_string('force_recalc_all_session_now', 'attendanceregister');
+            if ( $register->pendingrecalc ) {
+                $menuEntryStr  = $menuEntryStr . ' ' . get_string('recalc_already_pending', 'attendanceregister');
+                $attendanceregisternode->add($menuEntryStr, $linkUrl, navigation_node::TYPE_SETTING);
+            } else {
+                $attendanceregisternode->add($menuEntryStr, $linkUrl, navigation_node::TYPE_SETTING);
+
+                // Also adds Schedule Entry
+                $linkUrl2 = attendanceregister_makeUrl($register, null, null, ATTENDANCEREGISTER_ACTION_SCHEDULERECALC);
+                $menuEntryStr2 =  get_string('schedule_reclalc_all_session', 'attendanceregister');
+                $attendanceregisternode->add($menuEntryStr2, $linkUrl2, navigation_node::TYPE_SETTING);
+            }
+        }
+    }
+
+}
+
 // ******************************
 // Module specific functions
 // ******************************
@@ -522,7 +573,7 @@ function attendanceregister_check_user_sessions_need_update($register, $userId, 
     global $DB;
 
     // Retrive User
-    $user = $DB->get_record('user', array('id' => $userId));
+    $user = attendanceregister__getUser($userId);
 
     // Retrieve User's Grand Total Aggregate (if any)
     $userGrandTotalAggregate = attendanceregister__get_cached_user_grandtotal($register, $userId);
@@ -653,9 +704,9 @@ function attendanceregister_save_offline_session($register, $formData) {
     $session->logout = $formData->logout;
     $session->duration = $formData->logout - $formData->login;
     $session->refcourse = (isset($formData->refcourse)) ? ($formData->refcourse) : null; // Hack needed as 0 is passed as refcourse if no refcourse has been selected
-    $session->comments = $formData->comments;
+    $session->comments = (isset( $formData->comments)) ? $formData->comments : null;
     // If saved for another user, record the current user
-    if ( $USER->id != $session->userid ) {
+    if ( !attendanceregister__isCurrentUser( $session->userid ) ) {
         $session->addedbyuserid = $USER->id;
     }
 
@@ -687,7 +738,7 @@ function attendanceregister_delete_offline_session($register, $userId, $sessionI
  */
 function attendanceregister_set_pending_recalc($register, $pendingRecalc) {
     global $DB;
-    $DB->update_record_raw('attendanceregister', array( 'id'=>$register->id, 'pendingrecalc'=>$pendingRecalc) );
+    $DB->update_record_raw('attendanceregister', array( 'id'=>$register->id, 'pendingrecalc'=>($pendingRecalc?1:0) ) );
 }
 
 

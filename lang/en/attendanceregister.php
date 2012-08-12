@@ -74,8 +74,9 @@ $string['attendanceregister:recalcsessions'] = "Can force Attendance Register's 
 $string['force_recalc_user_session'] = 'Recalculate this User\'s online Sessions';
 $string['force_recalc_all_session'] = 'Recalculate all online Sessions';
 $string['force_recalc_all_session_now'] = 'Recalculate Sessions, now';
-$string['schedule_reclalc_all_session'] = 'Schedule recalculating Sessions';
-$string['scheduled_recalc_pending'] = 'Sessions recalculating pending';
+$string['schedule_reclalc_all_session'] = 'Schedule Recalculate Sessions';
+$string['recalc_scheduled_on_next_cron'] = 'Sessions recalculating is scheduled for execution on next Cron';
+$string['recalc_already_pending'] = '(Already pending for execution on next Cron)';
 $string['back_to_tracked_user_list'] = 'Back to tracked Users list';
 $string['recalc_complete'] = 'Sessions Recalculation complete';
 $string['recalc_scheduled'] = 'Session recalculation has been scheduled. It will execute on next Cron';
@@ -158,6 +159,7 @@ $string['duration_mm'] = '{$a->minutes} min';
 $string['select_a_course_if_any'] = '- Select a Course, if any -';
 $string['select_a_course'] = '- Select a Course -';
 $string['insert_new_offline_session'] = 'Insert a new offline work session';
+$string['insert_new_offline_session_for_another_user'] = 'Insert a new offline work session for {$a->fullname}';
 //$string['offline_session_form_explain'] = 'You may enter an offline session of work.<br/>
 //    The offline work time will be added to the online sessions automatically recorded by the Attendance Register.<br/>
 //    The new session may not overlap with any existing work session, either online or offline, nor it may be more than {$a->dayscertificable} days ago.<br/>
