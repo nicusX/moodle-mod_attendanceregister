@@ -1,5 +1,9 @@
 Attendance Register Module - What's New
 
+RELEASE 2.3.2 (2012100702=
+Fixes 
+* [#35] Missing 'mod/attendanceregister:addinstance' for Moodle 2.3 compatibility
+
 RELEASE 2.3.1 (2012081202)
 Fixes
 * [#33] Incompatibilty with PostgreSQL on updating pendingRecalc flag

@@ -69,6 +69,7 @@ $string['attendanceregister:addotherofflinesess'] = "Can add Offline Sessions on
 $string['attendanceregister:deleteownofflinesess'] = "Can delete Offline Sessions from his/her own Register";
 $string['attendanceregister:deleteotherofflinesess'] = "Can delete Offline Sessions on other people's Register";
 $string['attendanceregister:recalcsessions'] = "Can force Attendance Register's Sessions recalculations";
+$string['attendanceregister:addinstance'] = "Add new attendance register";
 
 // Buttons & Links labels
 $string['force_recalc_user_session'] = 'Recalculate this User\'s online Sessions';
