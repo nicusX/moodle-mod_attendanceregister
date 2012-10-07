@@ -78,6 +78,7 @@ $string['attendanceregister:addotherofflinesess'] = "Può aggiungere Sessioni Of
 $string['attendanceregister:deleteownofflinesess'] = 'Può cancellare Sessioni Offline dal proprio Registro Presenze';
 $string['attendanceregister:deleteotherofflinesess'] = 'Può cancellare Sessioni Offline dal Resigistro Presenze di altri Utenti';
 $string['attendanceregister:recalcsessions'] = 'Può forzare il Ricalcolo delle Sessioni online del Registro Presenze';
+$string['attendanceregister:addinstance'] = "Aggiungere Registri Presenze";
 
 // Buttons & Links labels
 $string['force_recalc_user_session'] = 'Forza Ricalcolo Sessioni online di questo Utente';
