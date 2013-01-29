@@ -1,10 +1,20 @@
 Attendance Register Module - What's New
 
-RELEASE 2.3.2 (2012100702=
+### RELEASE 2.4.1 (2013012906)
+Fixes
+* [#39] Fixed offline session overlapping detection errors 
+* [#36] Fixed compatibility issue with Oracle ('online' columns renamed to 'onlinesess')
+* Fixed minor typos in Italian translation
+* Checked compatibility with Moodle 2.4.1
+Improvements
+* [#37] Improved performance of cron processing in crowded courses (thanks to MorrisR2)
+
+
+### RELEASE 2.3.2 (2012100702)
 Fixes 
 * [#35] Missing 'mod/attendanceregister:addinstance' for Moodle 2.3 compatibility
 
-RELEASE 2.3.1 (2012081202)
+### RELEASE 2.3.1 (2012081202)
 Fixes
 * [#33] Incompatibilty with PostgreSQL on updating pendingRecalc flag
 * [#34] Error saving Offline Sessions if comments are disabled
