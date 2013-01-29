@@ -258,6 +258,60 @@ function attendanceregister__update_user_aggregates($register, $userId) {
 }
 
 /**
+ * Retrieve all Users tracked by a given Register
+ *
+ * All Users that in the Register's Course have any Role with "mod/attendanceregister:tracked" Capability assigned.
+ * (NOT Users having this Capability in all tracked Courses!)
+ * 
+ * Optionally, retrieves only those users that logged in after their last recorded sessions
+ * (to speed up some functions)
+ * 
+ * @param object $register
+ * @param boolean $onlyIfUpdateNeeded if true, retrieves only users needing update
+ * @return array of users
+ */
+function attendanceregister__get_tracked_users($register, $onlyIfUpdateNeeded) {
+    $trackedUsers = array();
+
+    // Get Context of each Tracked Course
+    $thisCourse = attendanceregister__get_register_course($register);
+    $trackedCoursedIds = attendanceregister__get_tracked_courses_ids($register, $thisCourse);
+    foreach ($trackedCoursedIds as $courseId) {
+        $context = get_context_instance(CONTEXT_COURSE, $courseId);
+        if ( $onlyIfNeedUpdate ) {
+            // [issue #37] patch by https://github.com/MorrisR2, with minor changes 
+            // Retrieves only tracked users logged in after their last recorded sessions
+            $needs_aggregration_sql = '(SELECT DISTINCT userid 
+                                       FROM {user} u2, {attendanceregister_aggregate} aa2
+                                       WHERE aa2.userid=u2.id AND 
+                                       NOT aa2.lastsessionlogout > u2.currentlogin)';
+            list($esql, $params) = get_enrolled_sql($context, ATTENDANCEREGISTER_CAPABILITY_TRACKED);
+            $sql = "SELECT u.* FROM {user} u JOIN ($esql) je ON je.id = u.id WHERE u.id NOT IN($needs_aggregration_sql)";
+            $trackedUsersInCourse = $DB->get_records_sql($sql, $params);        
+        } else {
+            // Retrieve all tracked users
+            $trackedUsersInCourse = get_users_by_capability($context, ATTENDANCEREGISTER_CAPABILITY_TRACKED, '', '', '', '', '', '', false);
+        }
+        $trackedUsers = array_merge($trackedUsers, $trackedUsersInCourse);
+    }
+
+    // Users must be unique [issue #15]
+    $uniqueTrackedUsers = attendanceregister__unique_object_array_by_id($trackedUsers);
+
+    // sort Users by fullname [issue #13]
+    // (hack seen on http://www.php.net/manual/en/function.usort.php#104873 )
+    $compareByFullName = "return strcmp( fullname(\$a), fullname(\$b) );";
+    usort($uniqueTrackedUsers, create_function('$a,$b', $compareByFullName));
+
+    return $uniqueTrackedUsers;
+    
+}
+
+
+
+
+
+/**
  * Retrieve all User's Aggregates of a given User
  * @param object $register
  * @param int $userId
