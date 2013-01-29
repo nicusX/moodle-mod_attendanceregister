@@ -80,9 +80,9 @@ class attendanceregister_tracked_users {
                 if( $aggregate->grandtotal ) {
                     $this->usersSummaryAggregates[ $aggregate->userid ]->grandTotalDuration = $aggregate->duration;
                     $this->usersSummaryAggregates[ $aggregate->userid ]->lastSassionLogout = $aggregate->lastsessionlogout;
-                } else if ( $aggregate->total && $aggregate->online == 1 ) {
+                } else if ( $aggregate->total && $aggregate->onlinesess == 1 ) {
                 $this->usersSummaryAggregates[ $aggregate->userid ]->onlineTotalDuration = $aggregate->duration;
-                } else if ( $aggregate->total && $aggregate->online == 0 ) {
+                } else if ( $aggregate->total && $aggregate->onlinesess == 0 ) {
                     $this->usersSummaryAggregates[ $aggregate->userid ]->offlineTotalDuration = $aggregate->duration;
                 }
             }

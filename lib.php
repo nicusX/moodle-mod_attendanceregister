@@ -482,7 +482,7 @@ function attendanceregister_update_user_sessions($register, $userId, progress_ba
 function attendanceregister_delete_all_users_online_sessions_and_aggregates($register) {
     global $DB;
     $DB->delete_records('attendanceregister_aggregate', array('register' => $register->id));
-    $DB->delete_records('attendanceregister_session', array('register' => $register->id, 'online' => 1));
+    $DB->delete_records('attendanceregister_session', array('register' => $register->id, 'onlinesess' => 1));
 }
 
 /**
@@ -541,7 +541,8 @@ function attendanceregister_force_recalc_all($register) {
  * @return int number of updated users
  */
 function attendanceregister_updates_all_users_sessions($register) {
-    $users = attendanceregister_get_tracked_users($register);
+    // [issue #37] Gets only users logged in after last session
+    $users = attendanceregister__get_tracked_users($register, true); 
     $updatedUsersCount = 0;
     foreach ($users as $user) {
         if (attendanceregister_update_user_sessions($register, $user->id)) {
@@ -597,6 +598,8 @@ function attendanceregister_check_user_sessions_need_update($register, $userId, 
     }
 }
 
+
+
 /**
  * Retrieve all Users tracked by a given Register
  *
@@ -607,26 +610,7 @@ function attendanceregister_check_user_sessions_need_update($register, $userId, 
  * @return array of users
  */
 function attendanceregister_get_tracked_users($register) {
-    $trackedUsers = array();
-
-    // Get Context of each Tracked Course
-    $thisCourse = attendanceregister__get_register_course($register);
-    $trackedCoursedIds = attendanceregister__get_tracked_courses_ids($register, $thisCourse);
-    foreach ($trackedCoursedIds as $courseId) {
-        $context = get_context_instance(CONTEXT_COURSE, $courseId);
-        $trackedUsersInCourse = get_users_by_capability($context, ATTENDANCEREGISTER_CAPABILITY_TRACKED, '', '', '', '', '', '', false);
-        $trackedUsers = array_merge($trackedUsers, $trackedUsersInCourse);
-    }
-
-    // Users must be unique [issue #15]
-    $uniqueTrackedUsers = attendanceregister__unique_object_array_by_id($trackedUsers);
-
-    // sort Users by fullname [issue #13]
-    // (hack seen on http://www.php.net/manual/en/function.usort.php#104873 )
-    $compareByFullName = "return strcmp( fullname(\$a), fullname(\$b) );";
-    usort($uniqueTrackedUsers, create_function('$a,$b', $compareByFullName));
-
-    return $uniqueTrackedUsers;
+    return attendanceregister__get_tracked_users($register, false);
 }
 
 /**
@@ -699,7 +683,7 @@ function attendanceregister_save_offline_session($register, $formData) {
     $session->register = $register->id;
     // If a userid has not been set in the form (the user is saving in his own Register) use current $USER
     $session->userid =  (isset($formData->userid))?($formData->userid):($USER->id);
-    $session->online = 0;
+    $session->onlinesess = 0;
     $session->login = $formData->login;
     $session->logout = $formData->logout;
     $session->duration = $formData->logout - $formData->login;
@@ -724,7 +708,7 @@ function attendanceregister_save_offline_session($register, $formData) {
  */
 function attendanceregister_delete_offline_session($register, $userId, $sessionId) {
     global $DB;
-    $DB->delete_records('attendanceregister_session', array('id' => $sessionId, 'userid' => $userId, 'online' => 0));
+    $DB->delete_records('attendanceregister_session', array('id' => $sessionId, 'userid' => $userId, 'onlinesess' => 0));
     // Update aggregates
     attendanceregister__update_user_aggregates($register, $userId);
 }

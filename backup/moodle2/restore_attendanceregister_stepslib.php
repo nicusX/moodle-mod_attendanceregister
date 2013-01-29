@@ -54,6 +54,13 @@ class restore_attendanceregister_activity_structure_step extends restore_activit
         $data->userid = $this->get_mappingid('user', $data->userid);
         $data->addedbyuserid = $this->get_mappingid('user', $data->addedbyuserid);
 
+        // issue #36 and #41
+        // If 'online' field is defined (i.e. the backup is of an older version), rename it to 'onlinesess'
+        if ( isset($data->online) ) {
+            $data->onlinesess = $data->online;
+            unset($data->online);
+        }
+        
         // Lookup RefCourse by ShortName, if exists on destination
         if ($data->refcourseshortname) {
             $refcourse = $DB->get_record('course', array('shortname' => $data->refcourseshortname), '*', IGNORE_MISSING);
