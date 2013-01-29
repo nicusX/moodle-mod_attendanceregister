@@ -271,6 +271,7 @@ function attendanceregister__update_user_aggregates($register, $userId) {
  * @return array of users
  */
 function attendanceregister__get_tracked_users($register, $onlyIfUpdateNeeded) {
+    global $DB;
     $trackedUsers = array();
 
     // Get Context of each Tracked Course
@@ -530,7 +531,7 @@ function attendanceregister__delete_user_online_sessions($register, $userId, $on
     global $DB;
     $params =  array('userid' => $userId, 'register' => $register->id, 'onlinesess' => 1);
     if ( $onlyDeleteAfter ) {
-        $where = 'userid = :userid AND register = :register AND onlinesess = :online AND login >= :lowerlimit';
+        $where = 'userid = :userid AND register = :register AND onlinesess = :onlinesess AND login >= :lowerlimit';
         $params['lowerlimit'] = $onlyDeleteAfter;
         $DB->delete_records_select('attendanceregister_session', $where, $params);
     } else {
