@@ -111,7 +111,7 @@ class attendanceregister_user_sessions {
                 // Rowcount column
                 $rowcountStr = (string)$rowcount;
                 // Offline Delete button (if Session is offline and the current user may delete this user's offline sessions)
-                if ( !$session->online && $this->userCapabilites->canDeleteThisUserOfflineSession($session->userid) ) {
+                if ( !$session->onlinesess && $this->userCapabilites->canDeleteThisUserOfflineSession($session->userid) ) {
                     $deleteUrl = attendanceregister_makeUrl($this->register, $session->userid, null, ATTENDANCEREGISTER_ACTION_DELETE_OFFLINE_SESSION, array('session' => $session->id ));
                     $confirmAction = new confirm_action(get_string('are_you_sure_to_delete_offline_session', 'attendanceregister'));
                     $rowcountStr .= ' ' . $OUTPUT->action_icon($deleteUrl, new pix_icon('t/delete',  get_string('delete') ), $confirmAction);
@@ -130,7 +130,7 @@ class attendanceregister_user_sessions {
                 if ($this->register->offlinesessions) {
 
                     // Offline/Online
-                    $onlineOfflineStr = (($session->online) ? $stronline : $stroffline);
+                    $onlineOfflineStr = (($session->onlinesess) ? $stronline : $stroffline);
 
                     // if saved by other
                     if ( $session->addedbyuserid ) {
@@ -140,12 +140,12 @@ class attendanceregister_user_sessions {
                         $onlineOfflineStr = html_writer::tag('a', $onlineOfflineStr . '*', array('title'=>$addedByStr, 'class'=>'addedbyother') );
                     }
                     $tableCell = new html_table_cell($onlineOfflineStr);
-                    $tableCell->attributes['class'] .=  ( ($session->online)?' online_label':' offline_label' );
+                    $tableCell->attributes['class'] .=  ( ($session->onlinesess)?' online_label':' offline_label' );
                     $tableRow->cells[] = $tableCell;
 
                     // Ref.Course
                     if ( $this->register->offlinespecifycourse  ) {
-                        if ( $session->online ) {
+                        if ( $session->onlinesess ) {
                             $refCourseName = '';
                         } else {
                             if ( $session->refcourse ) {
@@ -167,7 +167,7 @@ class attendanceregister_user_sessions {
 
                     // Offline Comments
                     if ($this->register->offlinecomments  ) {
-                        if ( !$session->online && $session->comments ) {
+                        if ( !$session->onlinesess && $session->comments ) {
                             // Shorten the comments (if !printable)
                             if ( !$doShowPrintableVersion ) {
                                 $comment = attendanceregister__shorten_comment($session->comments);

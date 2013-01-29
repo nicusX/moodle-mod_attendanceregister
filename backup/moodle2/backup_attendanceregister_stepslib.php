@@ -33,7 +33,7 @@ class backup_attendanceregister_activity_structure_step extends backup_activity_
         $sessions = new backup_nested_element('sessions');
 
         $session = new backup_nested_element('session', array('id'),
-                array( 'userid', 'login', 'logout', 'duration', 'online', 'refcourseshortname', 'comments', 'addedbyuserid' ));
+                array( 'userid', 'login', 'logout', 'duration', 'onlinesess', 'refcourseshortname', 'comments', 'addedbyuserid' ));
 
         // Builds the tree
         $attendanceregister->add_child($sessions);
@@ -45,11 +45,11 @@ class backup_attendanceregister_activity_structure_step extends backup_activity_
 
         if ( $userinfo ) {
             $session->set_source_sql('
-                SELECT s.id, s.register, s.userid, s.login, s.logout, s.duration, s.online, s.comments,
+                SELECT s.id, s.register, s.userid, s.login, s.logout, s.duration, s.onlinesess, s.comments,
                     c.shortname AS refcourseshortname,
                     s.addedbyuserid
                   FROM {attendanceregister_session} s LEFT JOIN {course} c ON c.id = s.refcourse
-                  WHERE s.register = ? AND s.online = 0
+                  WHERE s.register = ? AND s.onlinesess = 0
                 ', array(backup::VAR_PARENTID));
         }
 

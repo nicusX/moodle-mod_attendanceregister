@@ -188,7 +188,7 @@ $string['login_must_be_before_logout'] = 'L\'Inizio della Sessione non può esse
 $string['dayscertificable_exceeded'] = 'Non può risalire a più di {$a} giorni fa';
 $string['overlaps_old_sessions'] = 'Non può sovrapporsi con altre sessioni registrate, né online né offline';
 $string['overlaps_current_session'] = 'Non può sovrapporsi con la sessione attuale (dall\'ultimo Login)';
-$string['unreasoneable_session'] = 'Sei sicuro? Sono più di {$a}!';
+$string['unreasoneable_session'] = 'Sei sicuro? Sono più di {$a} ore!';
 $string['logout_is_future'] = 'Non può essere futura';
 
 $string['tracked_users'] = 'Utenti tracciati';

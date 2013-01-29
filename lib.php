@@ -482,7 +482,7 @@ function attendanceregister_update_user_sessions($register, $userId, progress_ba
 function attendanceregister_delete_all_users_online_sessions_and_aggregates($register) {
     global $DB;
     $DB->delete_records('attendanceregister_aggregate', array('register' => $register->id));
-    $DB->delete_records('attendanceregister_session', array('register' => $register->id, 'online' => 1));
+    $DB->delete_records('attendanceregister_session', array('register' => $register->id, 'onlinesess' => 1));
 }
 
 /**
@@ -683,7 +683,7 @@ function attendanceregister_save_offline_session($register, $formData) {
     $session->register = $register->id;
     // If a userid has not been set in the form (the user is saving in his own Register) use current $USER
     $session->userid =  (isset($formData->userid))?($formData->userid):($USER->id);
-    $session->online = 0;
+    $session->onlinesess = 0;
     $session->login = $formData->login;
     $session->logout = $formData->logout;
     $session->duration = $formData->logout - $formData->login;
@@ -708,7 +708,7 @@ function attendanceregister_save_offline_session($register, $formData) {
  */
 function attendanceregister_delete_offline_session($register, $userId, $sessionId) {
     global $DB;
-    $DB->delete_records('attendanceregister_session', array('id' => $sessionId, 'userid' => $userId, 'online' => 0));
+    $DB->delete_records('attendanceregister_session', array('id' => $sessionId, 'userid' => $userId, 'onlinesess' => 0));
     // Update aggregates
     attendanceregister__update_user_aggregates($register, $userId);
 }
