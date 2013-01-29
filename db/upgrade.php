@@ -39,7 +39,7 @@ function xmldb_attendanceregister_upgrade($oldversion) {
 
         //// Add attendanceregister.pendingrecalc column
 
-        // Define field addedbyuser to be added to attendanceregister_session
+        // Define field addedbyuser to be added to attendanceregister
         $table = new xmldb_table('attendanceregister');
         $field = new xmldb_field('pendingrecalc', XMLDB_TYPE_INTEGER, '1', XMLDB_UNSIGNED, XMLDB_NOTNULL, null, 1 );
 
@@ -51,6 +51,27 @@ function xmldb_attendanceregister_upgrade($oldversion) {
         upgrade_mod_savepoint(true, 2012081004, 'attendanceregister');
     }
 
+    if ( $oldversion < 2013012904 ) {
+        /// Issue #36
+        
+        // Rename field attendanceregister_session.online to onlinessess
+        $table = new xmldb_table('attendanceregister_session');
+        $field = new xmldb_field('online', XMLDB_TYPE_INTEGER, '1', XMLDB_UNSIGNED, XMLDB_NOTNULL, null, 1 );
+        if ( $dbman->field_exists($table, $field) ) {
+            // Rename field
+            $dbman->rename_field($table, $field, 'onlinesess');
+        }
+        
+        // Rename field attendanceregister_aggregate.online to onlinessess
+        $table = new xmldb_table('attendanceregister_aggregate');
+        $field = new xmldb_field('online', XMLDB_TYPE_INTEGER, '1', XMLDB_UNSIGNED, XMLDB_NOTNULL, null, 1 );
+        if ( $dbman->field_exists($table, $field) ) {
+            // Rename field
+            $dbman->rename_field($table, $field, 'onlinesess');
+        }
+        
+    }
+    
     return true;
 }
 

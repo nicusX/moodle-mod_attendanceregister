@@ -42,7 +42,7 @@ function attendanceregister__calculate_last_user_online_session_logout($register
     global $DB;
 
     $queryParams = array('register' => $register->id, 'userid' => $userId);
-    $lastSessionEnd = $DB->get_field_sql('SELECT MAX(logout) FROM {attendanceregister_session} WHERE register = ? AND userid = ? AND online = 1', $queryParams);
+    $lastSessionEnd = $DB->get_field_sql('SELECT MAX(logout) FROM {attendanceregister_session} WHERE register = ? AND userid = ? AND onlinesess = 1', $queryParams);
     if ($lastSessionEnd === false) {
         $lastSessionEnd = 0;
     }
@@ -183,9 +183,9 @@ function attendanceregister__update_user_aggregates($register, $userId) {
     // Calculate aggregates of offline Sessions
     if ( $register->offlinesessions ) {
         // (note that refcourse has passed as first column to avoid warning of duplicate values in first column by get_records())
-        $sql = 'SELECT sess.refcourse, sess.register, sess.userid, 0 AS online, SUM(sess.duration) AS duration, 0 AS total, 0 as grandtotal'
+        $sql = 'SELECT sess.refcourse, sess.register, sess.userid, 0 AS onlinesess, SUM(sess.duration) AS duration, 0 AS total, 0 as grandtotal'
               .' FROM {attendanceregister_session} sess'
-              .' WHERE sess.online = 0 AND sess.register = :registerid AND sess.userid = :userid'
+              .' WHERE sess.onlinesess = 0 AND sess.register = :registerid AND sess.userid = :userid'
               .' GROUP BY sess.register, sess.userid, sess.refcourse';
         $offlinePerCourseAggregates = $DB->get_records_sql($sql, $queryParams);
         // Append records
@@ -194,9 +194,9 @@ function attendanceregister__update_user_aggregates($register, $userId) {
         }
 
         // Calculates total offline, regardless of RefCourse
-        $sql = 'SELECT sess.register, sess.userid, 0 AS online, null AS refcourse, SUM(sess.duration) AS duration, 1 AS total, 0 as grandtotal'
+        $sql = 'SELECT sess.register, sess.userid, 0 AS onlinesess, null AS refcourse, SUM(sess.duration) AS duration, 1 AS total, 0 as grandtotal'
               .' FROM {attendanceregister_session} sess'
-              .' WHERE sess.online = 0 AND sess.register = :registerid AND sess.userid = :userid'
+              .' WHERE sess.onlinesess = 0 AND sess.register = :registerid AND sess.userid = :userid'
               .' GROUP BY sess.register, sess.userid';
         $totalOfflineAggregate = $DB->get_record_sql($sql, $queryParams);
         // Append record
@@ -206,9 +206,9 @@ function attendanceregister__update_user_aggregates($register, $userId) {
     }
 
     // Calculates aggregates of online Sessions (this is a total as no RefCourse may exist)
-    $sql = 'SELECT sess.register, sess.userid, 1 AS online, null AS refcourse, SUM(sess.duration) AS duration, 1 AS total, 0 as grandtotal'
+    $sql = 'SELECT sess.register, sess.userid, 1 AS onlinesess, null AS refcourse, SUM(sess.duration) AS duration, 1 AS total, 0 as grandtotal'
           .' FROM {attendanceregister_session} sess'
-          .' WHERE sess.online = 1 AND sess.register = :registerid AND sess.userid = :userid'
+          .' WHERE sess.onlinesess = 1 AND sess.register = :registerid AND sess.userid = :userid'
           .' GROUP BY sess.register, sess.userid';
     $onlineAggregate = $DB->get_record_sql($sql, $queryParams);
 
@@ -217,7 +217,7 @@ function attendanceregister__update_user_aggregates($register, $userId) {
         $onlineAggregate = new stdClass();
         $onlineAggregate->register = $register->id;
         $onlineAggregate->userid = $userId;
-        $onlineAggregate->online = 1;
+        $onlineAggregate->onlinesess = 1;
         $onlineAggregate->refcourse = null;
         $onlineAggregate->duration = 0;
         $onlineAggregate->total = 1;
@@ -229,7 +229,7 @@ function attendanceregister__update_user_aggregates($register, $userId) {
 
     // Calculates grand total
 
-    $sql = 'SELECT sess.register, sess.userid, null AS online, null AS refcourse, SUM(sess.duration) AS duration, 0 AS total, 1 as grandtotal'
+    $sql = 'SELECT sess.register, sess.userid, null AS onlinesess, null AS refcourse, SUM(sess.duration) AS duration, 0 AS total, 1 as grandtotal'
           .' FROM {attendanceregister_session} sess'
           .' WHERE sess.register = :registerid AND sess.userid = :userid'
           .' GROUP BY sess.register, sess.userid';
@@ -240,7 +240,7 @@ function attendanceregister__update_user_aggregates($register, $userId) {
         $grandTotalAggregate = new stdClass();
         $grandTotalAggregate->register = $register->id;
         $grandTotalAggregate->userid = $userId;
-        $grandTotalAggregate->online = null;
+        $grandTotalAggregate->onlinesess = null;
         $grandTotalAggregate->refcourse = null;
         $grandTotalAggregate->duration = 0;
         $grandTotalAggregate->total = 0;
@@ -278,7 +278,7 @@ function attendanceregister__get_tracked_users($register, $onlyIfUpdateNeeded) {
     $trackedCoursedIds = attendanceregister__get_tracked_courses_ids($register, $thisCourse);
     foreach ($trackedCoursedIds as $courseId) {
         $context = get_context_instance(CONTEXT_COURSE, $courseId);
-        if ( $onlyIfNeedUpdate ) {
+        if ( $onlyIfUpdateNeeded ) {
             // [issue #37] patch by https://github.com/MorrisR2, with minor changes 
             // Retrieves only tracked users logged in after their last recorded sessions
             $needs_aggregration_sql = '(SELECT DISTINCT userid 
@@ -509,7 +509,7 @@ function attendanceregister__save_session($register, $userId, $loginTimestamp, $
     $session->login = $loginTimestamp;
     $session->logout = $logoutTimestamp;
     $session->duration = ($logoutTimestamp - $loginTimestamp);
-    $session->online = $isOnline;
+    $session->onlinesess = $isOnline;
     $session->refcourse = $refCourseId;
     $session->comments = $comments;
 
@@ -528,9 +528,9 @@ function attendanceregister__save_session($register, $userId, $loginTimestamp, $
  */
 function attendanceregister__delete_user_online_sessions($register, $userId, $onlyDeleteAfter = null) {
     global $DB;
-    $params =  array('userid' => $userId, 'register' => $register->id, 'online' => 1);
+    $params =  array('userid' => $userId, 'register' => $register->id, 'onlinesess' => 1);
     if ( $onlyDeleteAfter ) {
-        $where = 'userid = :userid AND register = :register AND online = :online AND login >= :lowerlimit';
+        $where = 'userid = :userid AND register = :register AND onlinesess = :online AND login >= :lowerlimit';
         $params['lowerlimit'] = $onlyDeleteAfter;
         $DB->delete_records_select('attendanceregister_session', $where, $params);
     } else {

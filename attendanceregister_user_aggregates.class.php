@@ -84,13 +84,13 @@ class attendanceregister_user_aggregates  {
             if( $aggregate->grandtotal ) {
                 $this->grandTotalDuration = $aggregate->duration;
                 $this->lastSassionLogout = $aggregate->lastsessionlogout;
-            } else if ( $aggregate->total && $aggregate->online == 1 ) {
+            } else if ( $aggregate->total && $aggregate->onlinesess == 1 ) {
                 $this->onlineTotalDuration = $aggregate->duration;
-            } else if ( $aggregate->total && $aggregate->online == 0 ) {
+            } else if ( $aggregate->total && $aggregate->onlinesess == 0 ) {
                 $this->offlineTotalDuration = $aggregate->duration;
-            } else if (!$aggregate->total && $aggregate->online == 0 && $aggregate->refcourse != null ) {
+            } else if (!$aggregate->total && $aggregate->onlinesess == 0 && $aggregate->refcourse != null ) {
                 $this->perCourseOfflineSessions[ $aggregate->refcourse ] = $aggregate->duration;
-            } else if (!$aggregate->total && $aggregate->online == 0 && $aggregate->refcourse == null ) {
+            } else if (!$aggregate->total && $aggregate->onlinesess == 0 && $aggregate->refcourse == null ) {
                 $this->noCourseOfflineSessions = $aggregate->duration;
             } else {
                 // Should not happen!

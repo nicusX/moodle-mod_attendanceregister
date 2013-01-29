@@ -13,12 +13,12 @@
  */
 
 defined('MOODLE_INTERNAL') || die;
-$module->version  = 2012100702;
+$module->version  = 2013012904;
 $module->requires = 2011120100;  // Requires this Moodle version
 $module->cron     = 300;
 $module->component = 'mod_attendanceregister'; // Full name of the plugin (used for diagnostics)
-$module->maturity  = MATURITY_STABLE;
-$module->release   = "2.3.2 (2012100702)"; // User-friendly version number
+$module->maturity  = MATURITY_BETA;
+$module->release   = "2.4.1 (2013012902)"; // User-friendly version number
 
 
 
