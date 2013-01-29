@@ -451,7 +451,7 @@ function attendanceregister__get_user_log_entries_in_courses($userId, $fromTime,
 function attendanceregister__check_overlapping_old_sessions($register, $userId, $login, $logout) {
     global $DB;
 
-    $select = 'userid = :userid AND register = :registerid AND (:login BETWEEN login AND logout) OR (:logout BETWEEN login AND logout)';
+    $select = 'userid = :userid AND register = :registerid AND ((:login BETWEEN login AND logout) OR (:logout BETWEEN login AND logout))';
     $params = array( 'userid' => $userId, 'registerid' => $register->id, 'login' => $login, 'logout' => $logout );
 
     return $DB->record_exists_select('attendanceregister_session', $select, $params);
