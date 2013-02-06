@@ -1,5 +1,9 @@
 Attendance Register Module - What's New
 
+### RELEASE 2.4.2 (2013020604)
+Fixes
+* [#42] DDL bug in fix for #36 that causes error during upgrade on PostgreSQL
+
 ### RELEASE 2.4.1 (2013012906)
 Fixes
 * [#39] Fixed offline session overlapping detection errors 
