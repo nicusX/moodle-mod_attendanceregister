@@ -1,5 +1,13 @@
 Attendance Register Module - What's New
 
+## BUGFIX 2.4.2+ (2013032201)
+Fixes
+* [#47] Fixed a regression bug in the improvement fix #37
+* [#46] Fixed Cron not correctly recording last execution time. 
+        It was executing at every cron, regardless of last execution.
+        Now Moodle does not execute module cron if last execution is less than 
+        5 minutes ago.
+
 ### RELEASE 2.4.2 (2013020604)
 Fixes
 * [#42] DDL bug in fix for #36 that causes error during upgrade on PostgreSQL

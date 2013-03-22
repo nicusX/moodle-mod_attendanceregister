@@ -258,19 +258,16 @@ function attendanceregister__update_user_aggregates($register, $userId) {
 }
 
 /**
- * Retrieve all Users tracked by a given Register
+ * Retrieve all Users tracked by a given Register.
+ * User are sorted by fullname
  *
  * All Users that in the Register's Course have any Role with "mod/attendanceregister:tracked" Capability assigned.
  * (NOT Users having this Capability in all tracked Courses!)
  * 
- * Optionally, retrieves only those users that logged in after their last recorded sessions
- * (to speed up some functions)
- * 
  * @param object $register
- * @param boolean $onlyIfUpdateNeeded if true, retrieves only users needing update
  * @return array of users
  */
-function attendanceregister__get_tracked_users($register, $onlyIfUpdateNeeded) {
+function attendanceregister__get_tracked_users($register) {
     global $DB;
     $trackedUsers = array();
 
@@ -279,20 +276,8 @@ function attendanceregister__get_tracked_users($register, $onlyIfUpdateNeeded) {
     $trackedCoursedIds = attendanceregister__get_tracked_courses_ids($register, $thisCourse);
     foreach ($trackedCoursedIds as $courseId) {
         $context = get_context_instance(CONTEXT_COURSE, $courseId);
-        if ( $onlyIfUpdateNeeded ) {
-            // [issue #37] patch by https://github.com/MorrisR2, with minor changes 
-            // Retrieves only tracked users logged in after their last recorded sessions
-            $needs_aggregration_sql = '(SELECT DISTINCT userid 
-                                       FROM {user} u2, {attendanceregister_aggregate} aa2
-                                       WHERE aa2.userid=u2.id AND 
-                                       NOT aa2.lastsessionlogout > u2.currentlogin)';
-            list($esql, $params) = get_enrolled_sql($context, ATTENDANCEREGISTER_CAPABILITY_TRACKED);
-            $sql = "SELECT u.* FROM {user} u JOIN ($esql) je ON je.id = u.id WHERE u.id NOT IN($needs_aggregration_sql)";
-            $trackedUsersInCourse = $DB->get_records_sql($sql, $params);        
-        } else {
-            // Retrieve all tracked users
-            $trackedUsersInCourse = get_users_by_capability($context, ATTENDANCEREGISTER_CAPABILITY_TRACKED, '', '', '', '', '', '', false);
-        }
+        // Retrieve all tracked users
+        $trackedUsersInCourse = get_users_by_capability($context, ATTENDANCEREGISTER_CAPABILITY_TRACKED, '', '', '', '', '', '', false);
         $trackedUsers = array_merge($trackedUsers, $trackedUsersInCourse);
     }
 
@@ -304,10 +289,56 @@ function attendanceregister__get_tracked_users($register, $onlyIfUpdateNeeded) {
     $compareByFullName = "return strcmp( fullname(\$a), fullname(\$b) );";
     usort($uniqueTrackedUsers, create_function('$a,$b', $compareByFullName));
 
-    return $uniqueTrackedUsers;
-    
+    return $uniqueTrackedUsers;    
 }
 
+/**
+ * Similar to attendanceregister__get_tracked_users($rgister), but retrieves only
+ * those tracked users whose online sessions need to be updated.
+ * 
+ * @param object $register
+ * @return array of users
+*/
+function attendanceregister__get_tracked_users_need_update($register) {
+    global $DB;
+    $trackedUsers = array();
+
+    // Get Context of each Tracked Course
+    $thisCourse = attendanceregister__get_register_course($register);
+    $trackedCoursedIds = attendanceregister__get_tracked_courses_ids($register, $thisCourse);
+    foreach ($trackedCoursedIds as $courseId) {
+        $context = get_context_instance(CONTEXT_COURSE, $courseId);
+
+        // Get SQL and params for users enrolled in course with ATTENDANCEREGISTER_CAPABILITY_TRACKED capability
+        list($esql, $params) = get_enrolled_sql($context, ATTENDANCEREGISTER_CAPABILITY_TRACKED);
+        
+        // Subquery to EXCLUDE users whose online session DO NOT need to be updated
+        // (last calculated session is older than current  login 
+        // or last login is less then session-timeout before "now")
+        $needs_update_sql = '(SELECT DISTINCT userid 
+                                   FROM {user} u2, {attendanceregister_aggregate} aa2
+                                   WHERE 
+                                     aa2.userid=u2.id 
+                                   AND aa2.register = :registerid
+                                   AND aa2.grandtotal = 1
+                                   AND ( u2.currentlogin <=  aa2.lastsessionlogout OR (:now - u2.lastlogin) <= (:sesstimeout * 60) ) )';
+        // Build the SQL query with exlude subquery
+        $sql = "SELECT u.* FROM {user} u JOIN ($esql) je ON je.id = u.id WHERE u.id NOT IN($needs_update_sql)";
+        // Append subquery parameters
+        $params['registerid'] = $register->id;
+        $params['now'] = time();
+        $params['sesstimeout'] = $register->sessiontimeout;
+        // Execute query
+        $trackedUsersInCourse = $DB->get_records_sql($sql, $params);        
+        
+        $trackedUsers = array_merge($trackedUsers, $trackedUsersInCourse);
+    }
+
+    // Users must be unique [issue #15]
+    $uniqueTrackedUsers = attendanceregister__unique_object_array_by_id($trackedUsers);
+
+    return $uniqueTrackedUsers;            
+}
 
 
 
