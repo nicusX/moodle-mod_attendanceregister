@@ -183,3 +183,7 @@ $string['unreasoneable_session'] = 'Are you sure? This is more than {$a} hours l
 $string['logout_is_future'] = 'May not be in the future';
 
 $string['tracked_users'] = 'Tracked Users';
+
+// Activity Completion tracking
+$string['completionduration'] = 'Require total time [minutes]';
+$string['completiondurationgroup'] = 'Tracked time';

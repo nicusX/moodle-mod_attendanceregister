@@ -192,3 +192,7 @@ $string['unreasoneable_session'] = 'Sei sicuro? Sono più di {$a} ore!';
 $string['logout_is_future'] = 'Non può essere futura';
 
 $string['tracked_users'] = 'Utenti tracciati';
+
+// Activity Completion tracking
+$string['completionduration'] = 'Tempo minimo totale  [minuti]';
+$string['completiondurationgroup'] = 'Tempo tracciato dal Registro';
