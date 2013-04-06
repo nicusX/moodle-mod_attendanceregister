@@ -127,4 +127,65 @@ class mod_attendanceregister_mod_form extends moodleform_mod {
         $this->add_action_buttons();
     }
 
+    /**
+     * Add completion rules
+     * [feature #7]
+     */
+    function add_completion_rules() {
+        $mform =& $this->_form;
+        $group=array();
+        $group[] =& $mform->createElement('checkbox', 'completiondurationenabled', ' ', get_string('completionduration','attendanceregister'));
+        $group[] =& $mform->createElement('text', 'completiontotaldurationmins', ' ', array('size'=>3));
+        $mform->setType('completiontotaldurationmins',PARAM_INT);
+        $mform->addGroup($group, 'completiondurationgroup', get_string('completiondurationgroup','attendanceregister'), array(' '), false);
+        $mform->disabledIf('completiontotaldurationmins','completiondurationenabled','notchecked');
+    // ... when more tracked values will be supported, add fields here
+        
+        return array('completiondurationgroup');
+    }
+    
+    /**
+     * Validate completion rules
+     * [feature #7]
+     */
+    function completion_rule_enabled($data) {
+        // ... when more tracked values will be supported, put checking here 
+        return( !empty($data['completiondurationenabled']) && $data['completiontotaldurationmins'] != 0 );
+    }
+    
+    /**
+     * Extend get_data() to support completion checkbox behaviour
+     * [feature #7]
+     */
+    function  get_data(){
+        $data = parent::get_data();
+        if (!$data) {
+            return $data;
+        }
+        if (!empty($data->completionunlocked)) {
+            // Turn off completion settings if the checkboxes aren't ticked
+            $autocompletion = !empty($data->completion) && $data->completion==COMPLETION_TRACKING_AUTOMATIC;
+            if (empty($data->completiondurationenabled) || !$autocompletion) {
+                // ... when more tracked values will be supported, set disabled value here
+               $data->completiontotaldurationmins = 0;
+            }
+        }
+        return $data;        
+    }
+    
+    /**
+     * Prepare completion checkboxes when form is displayed
+     */
+    function data_preprocessing(&$default_values){    
+        parent::data_preprocessing($default_values);
+        
+        // Set up the completion checkboxes which aren't part of standard data.
+        // We also make the default value (if you turn on the checkbox) for those
+        // numbers to be 1, this will not apply unless checkbox is ticked.
+        $default_values['completiondurationenabled']= !empty($default_values['completiontotaldurationmins']) ? 1 : 0;
+        if(empty($default_values['completiontotaldurationmins'])) {
+            $default_values['completiontotaldurationmins']=ATTENDANCEREGISTER_DEFAULT_COMPLETION_TOTAL_DURATION_MINS;
+        }       
+        // ... when more tracked values will be supported, set default value here
+    }
 }

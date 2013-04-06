@@ -1,5 +1,10 @@
 Attendance Register Module - What's New
 
+## ALPHA 2.4.3a (2013040605)
+THIS IS AN ALPHA VERSION.
+No MySQL and Moodle 2.4 and 2.3 compatibility check has been done yet!
+* [#7] Added Activity Completion support, based on total tracked time
+
 ## BUGFIX 2.4.2+ (2013032201)
 Fixes
 * [#47] Fixed a regression bug in the improvement fix #37

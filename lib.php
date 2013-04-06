@@ -100,6 +100,11 @@ define('ATTENDANCEREGISTER_COMMENTS_SHORTEN_LENGTH', 25);
  */
 define('ATTENDANCEREGISTER_ORPHANED_LOCKS_DELAY_SECONDS', 30*60);
 
+/**
+ * Default completion total duration (in minutes): 1h
+ */
+define('ATTENDANCEREGISTER_DEFAULT_COMPLETION_TOTAL_DURATION_MINS', 60);
+
 // ******************************
 // Moodle Module API functions
 // ******************************
@@ -232,7 +237,7 @@ function attendanceregister_supports($feature) {
         case FEATURE_GROUPMEMBERSONLY: return false;
         case FEATURE_MOD_INTRO: return true;
         case FEATURE_COMPLETION_TRACKS_VIEWS: return true;
-        case FEATURE_COMPLETION_HAS_RULES: return false;
+        case FEATURE_COMPLETION_HAS_RULES: return true;
         case FEATURE_GRADE_HAS_GRADE: return false;
         case FEATURE_GRADE_OUTCOMES: return false;
         case FEATURE_RATE: return false;
@@ -798,4 +803,31 @@ function attendanceregister_add_to_log($register, $cmId, $action, $userId = null
 
     // Add Log Entry
     add_to_log($register->course, 'attendanceregister', $logAction, $logUrl, '', $cmId);
+}
+
+
+/**
+ * Implements activity completion conditions
+ * [feature #7]
+ * 
+ * @param object $course Course
+ * @param object $cm Course-module
+ * @param int $userid User ID
+ * @param bool $type Type of comparison (or/and; can be used as return value if no conditions)
+ * @return bool True if completed, false if not, $type if conditions not set.
+ */
+function attendanceregister_get_completion_state($course,$cm,$userid,$type) {
+    global $CFG,$DB;
+    
+    // Get instance details
+    if( !($register=$DB->get_record('attendanceregister',array('id'=>$cm->instance)))) {
+        throw new Exception("Can't find attendanceregister {$cm->instance}");
+    }
+    
+    // If completion option is enabled, evaluate it and return true/false 
+    if ( $register->completiontotaldurationmins ) {
+        return attendanceregister__calculateUserCompletion($register,$userid);
+    } else {
+        return $type;
+    }    
 }

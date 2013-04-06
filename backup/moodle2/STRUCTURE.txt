@@ -15,6 +15,7 @@ AttendanceRegister backup structure
 	- offlinespecifycourse
 	- mandofflspeccourse
 	- timemodified
+        - completiontotaldurationmins  (new with version 2.4.3)
 
 * sessions	(user info)
 	- id (attr)
