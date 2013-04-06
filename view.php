@@ -329,21 +329,6 @@ else if ($doShowContents) {
             $completion->set_module_viewed($cm, $userId);
         }    
         
-        /// Update sessions
-
-        // If Update-on-view is enabled and it is not executing Recalculate and is not
-        // in Printable-version, updates User's Sessions (and aggregates)
-        if (ATTENDANCEREGISTER_UPDATE_SESSIONS_ON_VIEW && !$doShowPrintableVersion && !$doRecalculate && !$doScheduleRecalc) {
-            $progressbar = new progress_bar('recalcbar', 500, true);
-            $updated = attendanceregister_update_user_sessions($register, $userId, $progressbar);
-
-            // Reload User's Sessions if updated
-            if ($updated) {
-                $userSessions = new attendanceregister_user_sessions($register, $userId, $userCapabilities);
-            }
-            echo '<hr />';
-        }
-
         /// Button bar
 
         echo $OUTPUT->container_start('attendanceregister_buttonbar');

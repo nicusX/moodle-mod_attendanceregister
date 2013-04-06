@@ -76,12 +76,6 @@ define("ATTENDANCEREGISTER_CAPABILITY_RECALC_SESSIONS", "mod/attendanceregister:
  */
 define("ATTENDANCEREGISTER_ALLOW_LOGINAS_OFFLINE_SESSIONS", false);
 
-/**
- * Enable updating User's Sessions and Aggregates every time a User's Register page
- * is shown.
- * This should be turned on only for testing!
- */
-define("ATTENDANCEREGISTER_UPDATE_SESSIONS_ON_VIEW", false);
 
 /**
  * Define the maximum Offline session length that will be considered reasonable
