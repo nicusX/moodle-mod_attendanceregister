@@ -196,5 +196,5 @@ $string['logout_is_future'] = 'Non può essere futura';
 $string['tracked_users'] = 'Utenti tracciati';
 
 // Activity Completion tracking
-$string['completionduration'] = 'Tempo minimo totale  [minuti]';
-$string['completiondurationgroup'] = 'Tempo tracciato dal Registro';
+$string['completiontotalduration'] = 'Tempo minimo [minuti]';
+$string['completiondurationgroup'] = 'Tempo totale tracciato';

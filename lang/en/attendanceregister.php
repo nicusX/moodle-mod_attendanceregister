@@ -187,5 +187,5 @@ $string['logout_is_future'] = 'May not be in the future';
 $string['tracked_users'] = 'Tracked Users';
 
 // Activity Completion tracking
-$string['completionduration'] = 'Require total time [minutes]';
-$string['completiondurationgroup'] = 'Tracked time';
+$string['completiontotalduration'] = 'Require time [minutes]';
+$string['completiondurationgroup'] = 'Total tracked time';

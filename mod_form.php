@@ -134,12 +134,13 @@ class mod_attendanceregister_mod_form extends moodleform_mod {
     function add_completion_rules() {
         $mform =& $this->_form;
         $group=array();
-        $group[] =& $mform->createElement('checkbox', 'completiondurationenabled', ' ', get_string('completionduration','attendanceregister'));
-        $group[] =& $mform->createElement('text', 'completiontotaldurationmins', ' ', array('size'=>3));
+        $group[] =& $mform->createElement('checkbox', 'completiontotaldurationenabled', ' ', get_string('completiontotalduration','attendanceregister'));
+        $group[] =& $mform->createElement('text', 'completiontotaldurationmins', ' ', array('size'=>4));
         $mform->setType('completiontotaldurationmins',PARAM_INT);
         $mform->addGroup($group, 'completiondurationgroup', get_string('completiondurationgroup','attendanceregister'), array(' '), false);
-        $mform->disabledIf('completiontotaldurationmins','completiondurationenabled','notchecked');
-    // ... when more tracked values will be supported, add fields here
+        $mform->disabledIf('completiontotaldurationmins','completiontotaldurationenabled','notchecked');
+        
+        // ... when more tracked values will be supported, add fields here
         
         return array('completiondurationgroup');
     }
@@ -150,7 +151,7 @@ class mod_attendanceregister_mod_form extends moodleform_mod {
      */
     function completion_rule_enabled($data) {
         // ... when more tracked values will be supported, put checking here 
-        return( !empty($data['completiondurationenabled']) && $data['completiontotaldurationmins'] != 0 );
+        return( (!empty($data['completiontotaldurationenabled']) && $data['completiontotaldurationmins'] != 0) );
     }
     
     /**
@@ -160,16 +161,19 @@ class mod_attendanceregister_mod_form extends moodleform_mod {
     function  get_data(){
         $data = parent::get_data();
         if (!$data) {
-            return $data;
+            return false;
         }
+        
+        // Turn off completion settings if the checkboxes aren't ticked
         if (!empty($data->completionunlocked)) {
-            // Turn off completion settings if the checkboxes aren't ticked
             $autocompletion = !empty($data->completion) && $data->completion==COMPLETION_TRACKING_AUTOMATIC;
-            if (empty($data->completiondurationenabled) || !$autocompletion) {
-                // ... when more tracked values will be supported, set disabled value here
+            if (empty($data->completiontotaldurationenabled) || !$autocompletion) {
                $data->completiontotaldurationmins = 0;
             }
         }
+        
+        // ... when more tracked values will be supported, set disabled value here
+        
         return $data;        
     }
     
@@ -182,7 +186,8 @@ class mod_attendanceregister_mod_form extends moodleform_mod {
         // Set up the completion checkboxes which aren't part of standard data.
         // We also make the default value (if you turn on the checkbox) for those
         // numbers to be 1, this will not apply unless checkbox is ticked.
-        $default_values['completiondurationenabled']= !empty($default_values['completiontotaldurationmins']) ? 1 : 0;
+        $default_values['completiontotaldurationenabled'] = !empty($default_values['completiontotaldurationmins']) ? 1 : 0;
+        
         if(empty($default_values['completiontotaldurationmins'])) {
             $default_values['completiontotaldurationmins']=ATTENDANCEREGISTER_DEFAULT_COMPLETION_TOTAL_DURATION_MINS;
         }       
