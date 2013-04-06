@@ -804,56 +804,67 @@ function attendanceregister__isAnyCompletionConditionSpecified($register) {
  */
 function attendanceregister__calculateUserCompletion($register, $userid) {
     global $DB;
-    
+
     // If not completion condition is set, returns immediately
     if ( !attendanceregister__isAnyCompletionConditionSpecified($register)) {
         return null;
     }
-    
+
     /// Retrieve all tracked values (useful for completion) for the user
-    
+
     // Calculate total tracked time by an instance for a user
     $sql_totaldurationsecs = "select sum(sess.duration) from {attendanceregister_session} sess where sess.register=:registerid and userid=:userid";
     $params = array( 'registerid' => $register->id, 'userid' => $userid );
     $totaldurationsecs = $DB->get_field_sql($sql_totaldurationsecs, $params);
-    
+
     // ... When more tracked values will be supported, put calculation here
-    
+
     // Evaluate all tracked parameters for completion
     return attendanceregister__areCompletionConditionsMet($register, array('totaldurationsecs' => $totaldurationsecs) );
- }
+}
  
- /**
-  * Check if a set of tracked values meets the completion condition for the instance
+/**
+ * Check if a set of tracked values meets the completion condition for the instance
+ * 
+ * This method implements evaluation of (pre-calculated) tracked values 
+ * against completion conditions.
+ * ANY COMPLETION CHECK (for a user) must be delegated to this method.
+ * 
+ * Values are passed as an associative array.
+ * i.e.
+ * array( 'totaldurationsecs' => xxxxx,  )
   * 
-  * This method implements evaluation of (pre-calculated) tracked values 
-  * against completion conditions.
-  * ANY COMPLETION CHECK (for a user) must be delegated to this method.
-  * 
-  * Values are passed as an associative array.
-  * i.e.
-  * array( 'totaldurationsecs' => xxxxx,  )
-   * 
-  * @param object $register Register instance
-  * @param array $trackedValues array of tracked values, by parameter name
-  * @param int $totaldurationsecs total calculated duration, in seconds
-  * @return boolean TRUE if this values match comletion condition, otherwise FALSE
-  */
- function attendanceregister__areCompletionConditionsMet($register, $trackedValues ) {
-     // By now only totaldurationsecs is considered
-     // When more parameters will be added to completion condition set, this function will implement them
-     
-     if ( isset($trackedValues['totaldurationsecs'])) {
-        $totaldurationsecs = $trackedValues['totaldurationsecs'];
-        if ( !$totaldurationsecs ) {
-            return false;
-        }
-        return ( ($totaldurationsecs/60) >= $register->completiontotaldurationmins );         
-     } else {
-         return false;
-     }
- }
- 
+ * @param object $register Register instance
+ * @param array $trackedValues array of tracked values, by parameter name
+ * @param int $totaldurationsecs total calculated duration, in seconds
+ * @return boolean TRUE if this values match comletion condition, otherwise FALSE
+ */
+function attendanceregister__areCompletionConditionsMet($register, $trackedValues ) {
+    // By now only totaldurationsecs is considered
+    // When more parameters will be added to completion condition set, this function will implement them
+
+    if ( isset($trackedValues['totaldurationsecs'])) {
+       $totaldurationsecs = $trackedValues['totaldurationsecs'];
+       if ( !$totaldurationsecs ) {
+           return false;
+       }
+       return ( ($totaldurationsecs/60) >= $register->completiontotaldurationmins );         
+    } else {
+        return false;
+    }
+}
+
+/**
+ * Check if the Cron form this module ran after the creation of an instance
+ * @param object $cm Course-Module instance
+ * @return boolean TRUE if the Cron run on this module after instance creation
+ */
+function attendanceregister__didCronRanAfterInstanceCreation($cm) {
+    global $DB;
+    $module = $DB->get_record('modules', array('name'=>'attendanceregister'), '*', MUST_EXIST);
+    return ( $cm->added < $module->lastcron );
+}
+
 /**
  * Class form Offline Session Self-Certification form
  * (Note that the User is always the CURRENT user ($USER) )

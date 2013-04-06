@@ -78,6 +78,7 @@ $string['force_recalc_all_session_now'] = 'Recalculate Sessions, now';
 $string['schedule_reclalc_all_session'] = 'Schedule Recalculate Sessions';
 $string['recalc_scheduled_on_next_cron'] = 'Sessions recalculating is scheduled for execution on next Cron';
 $string['recalc_already_pending'] = '(Already pending for execution on next Cron)';
+$string['first_calc_at_next_cron_run'] = 'Any past Session will show at next Cron';
 $string['back_to_tracked_user_list'] = 'Back to tracked Users list';
 $string['recalc_complete'] = 'Sessions Recalculation complete';
 $string['recalc_scheduled'] = 'Session recalculation has been scheduled. It will execute on next Cron';

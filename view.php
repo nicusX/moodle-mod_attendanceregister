@@ -370,6 +370,10 @@ else if ($doShowContents) {
         if ( $register->pendingrecalc && $userCapabilities->canRecalcSessions && !$doShowPrintableVersion ) {
             echo $OUTPUT->notification( get_string('recalc_scheduled_on_next_cron', 'attendanceregister')  );
         }
+        // Show cron not yet run on this instance
+        else if ( !attendanceregister__didCronRanAfterInstanceCreation($cm) ) {
+            echo $OUTPUT->notification( get_string('first_calc_at_next_cron_run', 'attendanceregister')  );
+        }
 
         echo $OUTPUT->container_start('attendanceregister_buttonbar');
 
