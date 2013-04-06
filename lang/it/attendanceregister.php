@@ -93,6 +93,7 @@ $string['recalc_scheduled'] = 'Il ricalcolo Sessioni è stato programmato. Verr�
 $string['offline_session_deleted'] = 'La Sessione offline è stata eliminata';
 $string['offline_session_saved'] = 'La nuova Sessione offline è stata salvata';
 $string['show_printable'] = 'Versione Stampabile';
+$string['show_my_sessions'] = 'Le mie Sessioni';
 $string['back_to_normal'] = 'Torna alla versione normale';
 $string['force_recalc_user_session_help'] = 'Cancellla e ricalcola tutte le Sessioni online di questo Utente.<br />
     Normalmente <b>non è necessario ricalcolare</b> le sessioni!<br />

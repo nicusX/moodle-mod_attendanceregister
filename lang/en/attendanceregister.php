@@ -84,6 +84,7 @@ $string['recalc_scheduled'] = 'Session recalculation has been scheduled. It will
 $string['offline_session_deleted'] = 'Offline Session deleted';
 $string['offline_session_saved'] = 'New Offline Session saved';
 $string['show_printable'] = 'Show printable version';
+$string['show_my_sessions'] = 'Show my sessions';
 $string['back_to_normal'] = 'Back to normal version';
 $string['force_recalc_user_session_help'] = 'Delete and recalculate all online Sessions of this User.<br />
     Normally you <b>do not need to do it</b>!<br />

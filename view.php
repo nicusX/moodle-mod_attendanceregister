@@ -202,7 +202,6 @@ attendanceregister_add_to_log($register, $cm->id, $inputAction, $userId, $groupI
 
 
 
-
 // ==============================================
 // Start Page Rendering
 // ==============================================
@@ -320,10 +319,8 @@ else if ($doShowContents) {
 
     //// Show User's Sessions
     if ($userId) {
-
         
-        /// View Completion [fixed with isse #52]
-        
+        /// On View Completion [fixed with isse #52]        
         // If current user is the selected user (and completion is enabled) mark module as viewed
         if ( $userId == $USER->id && $completion->is_enabled($cm) ) {
             $completion->set_module_viewed($cm, $userId);
@@ -376,9 +373,16 @@ else if ($doShowContents) {
 
         echo $OUTPUT->container_start('attendanceregister_buttonbar');
 
+        // If current user is tracked, show view-my-sessions button [feature #28]
+        if ( $userCapabilities->isTracked ) {
+            $linkUrl = attendanceregister_makeUrl($register, $USER->id);
+            echo $OUTPUT->single_button($linkUrl, get_string('show_my_sessions' ,'attendanceregister'), 'get');
+        }
+        
         // Printable version button or Back to normal version
         $linkUrl = attendanceregister_makeUrl($register, null, null, ( ($doShowPrintableVersion) ? (null) : (ATTENDANCEREGISTER_ACTION_PRINTABLE)));
         echo $OUTPUT->single_button($linkUrl, (($doShowPrintableVersion) ? (get_string('back_to_normal', 'attendanceregister')) : (get_string('show_printable', 'attendanceregister'))), 'get');
+        
         echo $OUTPUT->container_end();  // Button Bar
         echo '<br />';
 
