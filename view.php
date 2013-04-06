@@ -152,6 +152,10 @@ if ($sessionToDelete) {
 // Retrieve data to be shown
 // ===========================
 
+// Retrieve Course Completion info object
+$completion = new completion_info($course);
+
+
 // If viewing/updating one User's Register, load the user into $userToProcess
 // and retireve User's Sessions or retrieve the Register's Tracked Users
 // If viewing all Users load tracked user list
@@ -195,15 +199,6 @@ if ( $userToProcess ) {
 // ==================================================
 
 attendanceregister_add_to_log($register, $cm->id, $inputAction, $userId, $groupId);
-
-
-// =======================================
-// Completition
-// =======================================
-/// Mark as viewed
-$completion = new completion_info($course);
-$completion->set_module_viewed($cm);
-// other completion info are managed elsewhere
 
 
 
@@ -326,6 +321,14 @@ else if ($doShowContents) {
     //// Show User's Sessions
     if ($userId) {
 
+        
+        /// View Completion [fixed with isse #52]
+        
+        // If current user is the selected user (and completion is enabled) mark module as viewed
+        if ( $userId == $USER->id && $completion->is_enabled($cm) ) {
+            $completion->set_module_viewed($cm, $userId);
+        }    
+        
         /// Update sessions
 
         // If Update-on-view is enabled and it is not executing Recalculate and is not
