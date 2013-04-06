@@ -28,7 +28,7 @@ class backup_attendanceregister_activity_structure_step extends backup_activity_
             array( 'name', 'intro', 'introformat' , 'type', 'offlinesessions',
                 'sessiontimeout', 'dayscertificable',
                 'offlinecomments', 'mandatoryofflinecomm', 'offlinespecifycourse', 'mandofflspeccourse',
-                'timemodified' ));
+                'timemodified', 'completiontotaldurationmins' ));
 
         $sessions = new backup_nested_element('sessions');
 

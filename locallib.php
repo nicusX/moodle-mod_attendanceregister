@@ -167,6 +167,7 @@ function attendanceregister__build_new_user_sessions($register, $userId, $fromTi
 
 /**
  * Updates Aggregates for a given user
+ * and notify completion, if needed [feature #7]
  *
  * @param object $regiser
  * @param int $userId
@@ -255,6 +256,30 @@ function attendanceregister__update_user_aggregates($register, $userId) {
     foreach($aggregates as $aggregate) {
         $DB->insert_record('attendanceregister_aggregate', $aggregate );
     }
+    
+    // Notify completion if needed
+    // (only if any completion condition is enabled)
+    if ( attendanceregister__isAnyCompletionConditionSpecified($register) ) {
+        // Retrieve Course-Module an Course instances
+        $cm = get_coursemodule_from_instance('attendanceregister', $register->id, $register->course, null, MUST_EXIST);
+        $course = $DB->get_record('course', array('id' => $cm->course), '*', MUST_EXIST);
+        $completion=new completion_info($course);
+        if($completion->is_enabled($cm)) {
+            // Check completion values
+            $completionTrackedValues = array (
+                'totaldurationsecs' => $grandTotalAggregate->duration,
+            );
+            $isComplete = attendanceregister__areCompletionConditionsMet($register, $completionTrackedValues);
+            
+            // Notify complete or incomplete
+            if ( $isComplete ) {
+                $completion->update_state($cm, COMPLETION_COMPLETE, $userId);
+            } else {
+                $completion->update_state($cm, COMPLETION_INCOMPLETE, $userId);
+            }
+        }
+    }
+    
 }
 
 /**
@@ -742,7 +767,7 @@ function attendanceregister__isCurrentUser($userId) {
 }
 
 /**
- * Return
+ * Return user's full name or unknown
  * @param type $otherUserId
  */
 function attendanceregister__otherUserFullnameOrUnknown($otherUserId) {
@@ -753,6 +778,91 @@ function attendanceregister__otherUserFullnameOrUnknown($otherUserId) {
     } else {
         return get_string('unknown', 'attendanceregister');
     }
+}
+
+/**
+ * Check if any completion condition is enabled in a given Register instance.
+ * ANY CHECK FOR ENABLED COMPLETION CONDITION must use this function
+ * 
+ * @param object $register Register instance
+ * @return boolean TRUE if any completion condition is enabled
+ */
+function attendanceregister__isAnyCompletionConditionSpecified($register) {
+    return (boolean)( $register->completiontotaldurationmins );
+}
+
+/**
+ * Check completion of the activity by a user.
+ * Note that this method performs aggregation SQL queries for caculating tracked values
+ * useful for completion check.
+ * Actual completion condition check is delegated 
+ * to attendanceregister__areCompletionConditionsMet(...)
+ * 
+ * @param object $register AttendanceRegister
+ * @param int $userid User ID
+ * @return boolean TRUE if the Activity is complete, FALSE if not complete, NULL if no activity completion condition has been specified
+ */
+function attendanceregister__calculateUserCompletion($register, $userid) {
+    global $DB;
+
+    // If not completion condition is set, returns immediately
+    if ( !attendanceregister__isAnyCompletionConditionSpecified($register)) {
+        return null;
+    }
+
+    /// Retrieve all tracked values (useful for completion) for the user
+
+    // Calculate total tracked time by an instance for a user
+    $sql_totaldurationsecs = "select sum(sess.duration) from {attendanceregister_session} sess where sess.register=:registerid and userid=:userid";
+    $params = array( 'registerid' => $register->id, 'userid' => $userid );
+    $totaldurationsecs = $DB->get_field_sql($sql_totaldurationsecs, $params);
+
+    // ... When more tracked values will be supported, put calculation here
+
+    // Evaluate all tracked parameters for completion
+    return attendanceregister__areCompletionConditionsMet($register, array('totaldurationsecs' => $totaldurationsecs) );
+}
+ 
+/**
+ * Check if a set of tracked values meets the completion condition for the instance
+ * 
+ * This method implements evaluation of (pre-calculated) tracked values 
+ * against completion conditions.
+ * ANY COMPLETION CHECK (for a user) must be delegated to this method.
+ * 
+ * Values are passed as an associative array.
+ * i.e.
+ * array( 'totaldurationsecs' => xxxxx,  )
+  * 
+ * @param object $register Register instance
+ * @param array $trackedValues array of tracked values, by parameter name
+ * @param int $totaldurationsecs total calculated duration, in seconds
+ * @return boolean TRUE if this values match comletion condition, otherwise FALSE
+ */
+function attendanceregister__areCompletionConditionsMet($register, $trackedValues ) {
+    // By now only totaldurationsecs is considered
+    // When more parameters will be added to completion condition set, this function will implement them
+
+    if ( isset($trackedValues['totaldurationsecs'])) {
+       $totaldurationsecs = $trackedValues['totaldurationsecs'];
+       if ( !$totaldurationsecs ) {
+           return false;
+       }
+       return ( ($totaldurationsecs/60) >= $register->completiontotaldurationmins );         
+    } else {
+        return false;
+    }
+}
+
+/**
+ * Check if the Cron form this module ran after the creation of an instance
+ * @param object $cm Course-Module instance
+ * @return boolean TRUE if the Cron run on this module after instance creation
+ */
+function attendanceregister__didCronRanAfterInstanceCreation($cm) {
+    global $DB;
+    $module = $DB->get_record('modules', array('name'=>'attendanceregister'), '*', MUST_EXIST);
+    return ( $cm->added < $module->lastcron );
 }
 
 /**
