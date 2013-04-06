@@ -826,8 +826,7 @@ function attendanceregister_get_completion_state($course,$cm,$userid,$type) {
     
     // If completion option is enabled, evaluate it and return true/false 
     if ( $register->completiontotaldurationmins ) {
-        // TODO implement check
-        return false;
+        return attendanceregister__calculateUserCompletion($register,$userid);
     } else {
         return $type;
     }    

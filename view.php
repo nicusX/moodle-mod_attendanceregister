@@ -37,7 +37,7 @@ if ($id) {
     $register = $DB->get_record('attendanceregister', array('id' => $cm->instance), '*', MUST_EXIST);
 } else {
     $register = $DB->get_record('attendanceregister', array('id' => $a), '*', MUST_EXIST);
-    $cm = get_coursemodule_from_instance('attendanceregister', $register->id, 0, false, MUST_EXIST);
+    $cm = get_coursemodule_from_instance('attendanceregister', $register->id, $register->course, false, MUST_EXIST);
     $course = $DB->get_record('course', array('id' => $cm->course), '*', MUST_EXIST);
     $id = $cm->id;
 }
