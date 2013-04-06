@@ -37,7 +37,7 @@ if ($id) {
     $register = $DB->get_record('attendanceregister', array('id' => $cm->instance), '*', MUST_EXIST);
 } else {
     $register = $DB->get_record('attendanceregister', array('id' => $a), '*', MUST_EXIST);
-    $cm = get_coursemodule_from_instance('attendanceregister', $register->id, 0, false, MUST_EXIST);
+    $cm = get_coursemodule_from_instance('attendanceregister', $register->id, $register->course, false, MUST_EXIST);
     $course = $DB->get_record('course', array('id' => $cm->course), '*', MUST_EXIST);
     $id = $cm->id;
 }
@@ -152,6 +152,10 @@ if ($sessionToDelete) {
 // Retrieve data to be shown
 // ===========================
 
+// Retrieve Course Completion info object
+$completion = new completion_info($course);
+
+
 // If viewing/updating one User's Register, load the user into $userToProcess
 // and retireve User's Sessions or retrieve the Register's Tracked Users
 // If viewing all Users load tracked user list
@@ -195,16 +199,6 @@ if ( $userToProcess ) {
 // ==================================================
 
 attendanceregister_add_to_log($register, $cm->id, $inputAction, $userId, $groupId);
-
-
-// =======================================
-// Completition
-// =======================================
-/// Mark as viewed
-$completion = new completion_info($course);
-$completion->set_module_viewed($cm);
-// TODO add other Completition info
-
 
 
 
@@ -325,31 +319,17 @@ else if ($doShowContents) {
 
     //// Show User's Sessions
     if ($userId) {
-
-        /// Update sessions
-
-        // If Update-on-view is enabled and it is not executing Recalculate and is not
-        // in Printable-version, updates User's Sessions (and aggregates)
-        if (ATTENDANCEREGISTER_UPDATE_SESSIONS_ON_VIEW && !$doShowPrintableVersion && !$doRecalculate && !$doScheduleRecalc) {
-            $progressbar = new progress_bar('recalcbar', 500, true);
-            $updated = attendanceregister_update_user_sessions($register, $userId, $progressbar);
-
-            // Reload User's Sessions if updated
-            if ($updated) {
-                $userSessions = new attendanceregister_user_sessions($register, $userId, $userCapabilities);
-            }
-            echo '<hr />';
-        }
-
+        
+        /// On View Completion [fixed with isse #52]        
+        // If current user is the selected user (and completion is enabled) mark module as viewed
+        if ( $userId == $USER->id && $completion->is_enabled($cm) ) {
+            $completion->set_module_viewed($cm, $userId);
+        }    
+        
         /// Button bar
 
         echo $OUTPUT->container_start('attendanceregister_buttonbar');
-//        // Recalculate this User's Sessions (if allowed & !printable )
-//        if ($userCapabilities->canRecalcSessions && !$doShowPrintableVersion) {
-//            echo $OUTPUT->help_icon('force_recalc_user_session', 'attendanceregister');
-//            $linkUrl = attendanceregister_makeUrl($register, $userId, null, ATTENDANCEREGISTER_ACTION_RECALCULATE);
-//            echo $OUTPUT->single_button($linkUrl, get_string('force_recalc_user_session', 'attendanceregister'), 'get');
-//        }
+        
         // Printable version button or Back to normal version
         $linkUrl = attendanceregister_makeUrl($register, $userId, null, ( ($doShowPrintableVersion) ? (null) : (ATTENDANCEREGISTER_ACTION_PRINTABLE)));
         echo $OUTPUT->single_button($linkUrl, (($doShowPrintableVersion) ? (get_string('back_to_normal', 'attendanceregister')) : (get_string('show_printable', 'attendanceregister'))), 'get');
@@ -390,25 +370,23 @@ else if ($doShowContents) {
         if ( $register->pendingrecalc && $userCapabilities->canRecalcSessions && !$doShowPrintableVersion ) {
             echo $OUTPUT->notification( get_string('recalc_scheduled_on_next_cron', 'attendanceregister')  );
         }
+        // Show cron not yet run on this instance
+        else if ( !attendanceregister__didCronRanAfterInstanceCreation($cm) ) {
+            echo $OUTPUT->notification( get_string('first_calc_at_next_cron_run', 'attendanceregister')  );
+        }
 
         echo $OUTPUT->container_start('attendanceregister_buttonbar');
-//        // Recalculate Sessions button (only if allowed & !printable)
-//        if ($userCapabilities->canRecalcSessions && !$doShowPrintableVersion) {
-//            echo $OUTPUT->help_icon('force_recalc_all_session', 'attendanceregister');
-//            $linkUrl = attendanceregister_makeUrl($register, null, null, ATTENDANCEREGISTER_ACTION_RECALCULATE);
-//            echo $OUTPUT->single_button($linkUrl, get_string('force_recalc_all_session_now', 'attendanceregister'), 'get');
-//            if ( !$register->pendingrecalc ) {
-//                $linkUrl = attendanceregister_makeUrl($register, null, null, ATTENDANCEREGISTER_ACTION_SCHEDULERECALC);
-//                echo $OUTPUT->single_button($linkUrl, get_string('schedule_reclalc_all_session', 'attendanceregister'), 'get');
-//            } else {
-//                echo $OUTPUT->single_button('', get_string('recalc_scheduled_on_next_cron', 'attendanceregister'), 'get', array('disabled'=>true));
-//            }
-//        }
 
-
+        // If current user is tracked, show view-my-sessions button [feature #28]
+        if ( $userCapabilities->isTracked ) {
+            $linkUrl = attendanceregister_makeUrl($register, $USER->id);
+            echo $OUTPUT->single_button($linkUrl, get_string('show_my_sessions' ,'attendanceregister'), 'get');
+        }
+        
         // Printable version button or Back to normal version
         $linkUrl = attendanceregister_makeUrl($register, null, null, ( ($doShowPrintableVersion) ? (null) : (ATTENDANCEREGISTER_ACTION_PRINTABLE)));
         echo $OUTPUT->single_button($linkUrl, (($doShowPrintableVersion) ? (get_string('back_to_normal', 'attendanceregister')) : (get_string('show_printable', 'attendanceregister'))), 'get');
+        
         echo $OUTPUT->container_end();  // Button Bar
         echo '<br />';
 

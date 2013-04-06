@@ -36,6 +36,11 @@ class restore_attendanceregister_activity_structure_step extends restore_activit
         $data = (object) $data;
         $oldid = $data->id;
         $data->course = $this->get_courseid();
+        
+        // [feature #7] Set completiontotaldurationmins = 0 if not defined in backup
+        if ( !isset($data->completiontotaldurationmins)) {
+           $data->completiontotaldurationmins = 0; 
+        }
 
         // Insert the attendanceregister record
         $newitemid = $DB->insert_record('attendanceregister', $data);

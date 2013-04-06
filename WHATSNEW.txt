@@ -1,5 +1,18 @@
 Attendance Register Module - What's New
 
+## RELEASE 2.4.3 (2013040607)
+New Features
+* [#7]  Added Activity Completion support, based on total tracked time
+Fixes
+* [#52] Fixed on-view-completion implementation (it never actually worked)
+Improvements
+* [#28] When a tracked user may also view other users' sessions, in user lists
+        has a shortcut button to see his/her own sessions page.
+* [#43] After a new instance has been created, a message is shown to explain that
+        old Sessions will show on next cron run.
+* [#51] Removed update-sessions-on-user-view feature, that have been hidden and 
+        disabled since a long time ago
+
 ## BUGFIX 2.4.2+ (2013032201)
 Fixes
 * [#47] Fixed a regression bug in the improvement fix #37

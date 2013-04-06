@@ -85,14 +85,16 @@ $string['force_recalc_user_session'] = 'Forza Ricalcolo Sessioni online di quest
 $string['force_recalc_all_session'] = 'Forza Ricalcolo delle Sessioni online di tutti gli Utenti';
 $string['force_recalc_all_session_now'] = 'Ricalcola Sessioni, ora';
 $string['schedule_reclalc_all_session'] = 'Ricalcolo Sessioni al prossimo Cron';
-$string['recalc_scheduled_on_next_cron'] = 'Il Ricalcolo Sessioni è programmato per il prossimo cron';
+$string['recalc_scheduled_on_next_cron'] = 'Il Ricalcolo Sessioni è programmato per il prossimo Cron';
 $string['recalc_already_pending'] = '(Già programmato per il prossimo Cron)';
+$string['first_calc_at_next_cron_run'] = 'Eventuali Sessioni passate appariranno al prossimo Cron';
 $string['back_to_tracked_user_list'] = 'Torna alla lista degli Utenti';
 $string['recalc_complete'] = 'Ricalcolo Sessioni online completato';
 $string['recalc_scheduled'] = 'Il ricalcolo Sessioni è stato programmato. Verrà eseguito al prossimo Cron';
 $string['offline_session_deleted'] = 'La Sessione offline è stata eliminata';
 $string['offline_session_saved'] = 'La nuova Sessione offline è stata salvata';
 $string['show_printable'] = 'Versione Stampabile';
+$string['show_my_sessions'] = 'Le mie Sessioni';
 $string['back_to_normal'] = 'Torna alla versione normale';
 $string['force_recalc_user_session_help'] = 'Cancellla e ricalcola tutte le Sessioni online di questo Utente.<br />
     Normalmente <b>non è necessario ricalcolare</b> le sessioni!<br />
@@ -192,3 +194,7 @@ $string['unreasoneable_session'] = 'Sei sicuro? Sono più di {$a} ore!';
 $string['logout_is_future'] = 'Non può essere futura';
 
 $string['tracked_users'] = 'Utenti tracciati';
+
+// Activity Completion tracking
+$string['completiontotalduration'] = 'Tempo minimo [minuti]';
+$string['completiondurationgroup'] = 'Tempo totale tracciato';
