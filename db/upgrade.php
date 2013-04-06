@@ -72,6 +72,19 @@ function xmldb_attendanceregister_upgrade($oldversion) {
         
     }
     
+    if ( $oldversion < 2013040604 ) {
+        // Feature #7
+        
+        // Add field attendanceregister.completiontotalduration
+        $table = new xmldb_table('attendanceregister');
+        $field = new xmldb_field('completiontotalduration', XMLDB_TYPE_INTEGER, 10 , XMLDB_UNSIGNED, XMLDB_NOTNULL, null, 0 );
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+         
+        upgrade_mod_savepoint(true, 2013040604, 'attendanceregister');
+    }
+    
     return true;
 }
 
