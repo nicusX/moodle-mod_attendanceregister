@@ -16,6 +16,7 @@
 defined('MOODLE_INTERNAL') || die;
 
 require_once("$CFG->libdir/formslib.php");
+require_once("$CFG->libdir/completionlib.php"); 
 
 /**
  * Retrieve the Course object instance of the Course where the Register is

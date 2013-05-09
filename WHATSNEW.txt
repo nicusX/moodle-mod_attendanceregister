@@ -1,5 +1,9 @@
 Attendance Register Module - What's New
 
+## BUGFIX 2.4.3+ (2013050901)
+Fixes
+* [#54] Missing completionlib.php reference causes error during cron execution
+
 ## RELEASE 2.4.3 (2013040607)
 New Features
 * [#7]  Added Activity Completion support, based on total tracked time
