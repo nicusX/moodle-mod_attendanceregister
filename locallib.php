@@ -338,22 +338,32 @@ function attendanceregister__get_tracked_users_need_update($register) {
         // Get SQL and params for users enrolled in course with ATTENDANCEREGISTER_CAPABILITY_TRACKED capability
         list($esql, $params) = get_enrolled_sql($context, ATTENDANCEREGISTER_CAPABILITY_TRACKED);
         
-        // Subquery to EXCLUDE users whose online session DO NOT need to be updated
-        // (last calculated session is older than current  login 
-        // or last login is less then session-timeout before "now")
-        $needs_update_sql = '(SELECT DISTINCT userid 
-                                   FROM {user} u2, {attendanceregister_aggregate} aa2
-                                   WHERE 
-                                     aa2.userid=u2.id 
-                                   AND aa2.register = :registerid
-                                   AND aa2.grandtotal = 1
-                                   AND ( u2.currentlogin <=  aa2.lastsessionlogout OR (:now - u2.lastlogin) <= (:sesstimeout * 60) ) )';
-        // Build the SQL query with exlude subquery
-        $sql = "SELECT u.* FROM {user} u JOIN ($esql) je ON je.id = u.id WHERE u.id NOT IN($needs_update_sql)";
+        // Query to retrieve users that satisfy all the following:
+        // a) have ATTENDANCEREGISTER_CAPABILITY_TRACKED role in the tracked course
+        // AND
+        // b) whose last activity (lastaccess) on site is older than session timeout (in seconds)
+        // AND one of the fiollowing: 
+        // c1) Have no online session in this register
+        // c2) Have no calculated aggregate for this register
+        // c3) Last log entry for the tracked course is newer than last recorded session in this register (stored in aggregate)
+        $sql = "SELECT u.*  FROM {user} u JOIN ($esql) je ON je.id = u.id
+                WHERE u.lastaccess + (:sesstimeout * 60) < :now
+                  AND ( NOT EXISTS (SELECT * FROM {attendanceregister_session} as3
+                                     WHERE as3.userid = u.id AND as3.register = :registerid1 AND as3.onlinesess = 1)
+                        OR NOT EXISTS (SELECT * FROM {attendanceregister_aggregate} aa4 WHERE aa4.userid=u.id AND aa4.register=:registerid2  AND aa4.grandtotal = 1 )
+                        OR EXISTS (SELECT * FROM {attendanceregister_aggregate} aa2, {log} l2
+                                    WHERE aa2.userid = u.id AND aa2.register = :registerid3 
+                                      AND l2.course = :courseid AND l2.userid = aa2.userid                                  
+                                      AND aa2.grandtotal = 1
+                                      AND l2.time > aa2.lastsessionlogout) )";
+            
         // Append subquery parameters
-        $params['registerid'] = $register->id;
-        $params['now'] = time();
         $params['sesstimeout'] = $register->sessiontimeout;
+        $params['now'] = time();
+        $params['registerid1'] = $register->id;
+        $params['registerid2'] = $register->id;
+        $params['registerid3'] = $register->id;
+        $params['courseid'] = $courseId;
         // Execute query
         $trackedUsersInCourse = $DB->get_records_sql($sql, $params);        
         
