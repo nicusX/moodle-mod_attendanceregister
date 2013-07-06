@@ -195,12 +195,17 @@ if ( $userToProcess ) {
 
 
 // ==================================================
-// Logs User's action
+// Logs User's action and update completion-by-view
 // ==================================================
 
 attendanceregister_add_to_log($register, $cm->id, $inputAction, $userId, $groupId);
 
-
+/// On View Completion [fixed with isse #52]        
+// If current user is the selected user (and completion is enabled) mark module as viewed
+if ( $userId == $USER->id && $completion->is_enabled($cm) ) {
+    $completion->set_module_viewed($cm, $userId);
+}    
+        
 
 // ==============================================
 // Start Page Rendering
@@ -319,13 +324,7 @@ else if ($doShowContents) {
 
     //// Show User's Sessions
     if ($userId) {
-        
-        /// On View Completion [fixed with isse #52]        
-        // If current user is the selected user (and completion is enabled) mark module as viewed
-        if ( $userId == $USER->id && $completion->is_enabled($cm) ) {
-            $completion->set_module_viewed($cm, $userId);
-        }    
-        
+
         /// Button bar
 
         echo $OUTPUT->container_start('attendanceregister_buttonbar');
