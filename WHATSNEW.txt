@@ -1,5 +1,13 @@
 Attendance Register Module - What's New
 
+# Bugfix 2013.07.06.01
+(I've abandoned the previous version numbering, often confused with supported Moodle version number)
+Fixes
+* [#56] Rewritten query that determines which users must be checked for creating 
+        new online sessions (used on each cron run; determines the delay on session 
+        creation)
+* [#57] Minor warning (in DEBUG only) when personal Register page was shown
+
 ## BUGFIX 2.4.3+ (2013050901)
 Fixes
 * [#54] Missing completionlib.php reference causes error during cron execution
