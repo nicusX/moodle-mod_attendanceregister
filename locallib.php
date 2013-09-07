@@ -301,7 +301,7 @@ function attendanceregister__get_tracked_users($register) {
     $thisCourse = attendanceregister__get_register_course($register);
     $trackedCoursedIds = attendanceregister__get_tracked_courses_ids($register, $thisCourse);
     foreach ($trackedCoursedIds as $courseId) {
-        $context = get_context_instance(CONTEXT_COURSE, $courseId);
+        $context = context_course::instance($courseId);
         // Retrieve all tracked users
         $trackedUsersInCourse = get_users_by_capability($context, ATTENDANCEREGISTER_CAPABILITY_TRACKED, '', '', '', '', '', '', false);
         $trackedUsers = array_merge($trackedUsers, $trackedUsersInCourse);
@@ -333,7 +333,7 @@ function attendanceregister__get_tracked_users_need_update($register) {
     $thisCourse = attendanceregister__get_register_course($register);
     $trackedCoursedIds = attendanceregister__get_tracked_courses_ids($register, $thisCourse);
     foreach ($trackedCoursedIds as $courseId) {
-        $context = get_context_instance(CONTEXT_COURSE, $courseId);
+        $context = context_course::instance($courseId);
 
         // Get SQL and params for users enrolled in course with ATTENDANCEREGISTER_CAPABILITY_TRACKED capability
         list($esql, $params) = get_enrolled_sql($context, ATTENDANCEREGISTER_CAPABILITY_TRACKED);

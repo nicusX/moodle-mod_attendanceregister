@@ -55,7 +55,7 @@ if ($inputSessionId) {
 require_course_login($course, false, $cm);
 
 // Retrieve Context
-if (!($context = get_context_instance(CONTEXT_MODULE, $cm->id))) {
+if (!($context = context_module::instance($cm->id))) {
     print_error('badcontext');
 }
 
