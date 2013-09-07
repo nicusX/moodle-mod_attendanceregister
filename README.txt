@@ -1,11 +1,10 @@
 Attendance Register module for Moodle (http://moodle.org/) - Copyright (C) 2012 Lorenzo Nicora
 
-The Attendance Register is an Activity Module for calculating the time participants spend online,
-in a single Course or a group of Courses.
+The Attendance Register is an Activity Module for calculating the time participants spend online, in a single Course or a group of Courses.
 It also allow to enter offline sessions of work for calculating "total work time".
 
-Read the full feature in FEATURES.txt
-
+For a full description see online documentation: 
+https://github.com/nicusX/moodle-mod_attendanceregister/wiki
 
 This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 3 of the License, or (at your option) any later version.
 
@@ -23,6 +22,3 @@ Installation:
 
 Issue tracker:
 * https://github.com/nicusX/moodle-mod_attendanceregister/issues
-
-Online Docs:
-* https://github.com/nicusX/moodle-mod_attendanceregister/wiki
