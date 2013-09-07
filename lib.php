@@ -358,7 +358,7 @@ function attendanceregister_extend_settings_navigation(settings_navigation $sett
         return;
     }
     if (empty($PAGE->cm->context)) {
-        $PAGE->cm->context = get_context_instance(CONTEXT_MODULE, $PAGE->cm->instance);
+        $PAGE->cm->context = context_module::instance($PAGE->cm->instance);
     }
 
     $register = $PAGE->activityrecord;
@@ -624,7 +624,7 @@ function attendanceregister_get_tracked_users($register) {
  */
 function attendanceregister_is_tracked_user($register, $user) {
     $course = attendanceregister__get_register_course($register);
-    $context = get_context_instance(CONTEXT_COURSE, $course->id);
+    $context = context_course::instance($course->id);
 
     return has_capability(ATTENDANCEREGISTER_CAPABILITY_TRACKED, $context, $user);
 }

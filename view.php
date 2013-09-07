@@ -55,7 +55,7 @@ if ($inputSessionId) {
 require_course_login($course, false, $cm);
 
 // Retrieve Context
-if (!($context = get_context_instance(CONTEXT_MODULE, $cm->id))) {
+if (!($context = context_module::instance($cm->id))) {
     print_error('badcontext');
 }
 
@@ -195,12 +195,17 @@ if ( $userToProcess ) {
 
 
 // ==================================================
-// Logs User's action
+// Logs User's action and update completion-by-view
 // ==================================================
 
 attendanceregister_add_to_log($register, $cm->id, $inputAction, $userId, $groupId);
 
-
+/// On View Completion [fixed with isse #52]        
+// If current user is the selected user (and completion is enabled) mark module as viewed
+if ( $userId == $USER->id && $completion->is_enabled($cm) ) {
+    $completion->set_module_viewed($cm, $userId);
+}    
+        
 
 // ==============================================
 // Start Page Rendering
@@ -319,16 +324,10 @@ else if ($doShowContents) {
 
     //// Show User's Sessions
     if ($userId) {
-        
-        /// On View Completion [fixed with isse #52]        
-        // If current user is the selected user (and completion is enabled) mark module as viewed
-        if ( $userId == $USER->id && $completion->is_enabled($cm) ) {
-            $completion->set_module_viewed($cm, $userId);
-        }    
-        
+
         /// Button bar
 
-        echo $OUTPUT->container_start('attendanceregister_buttonbar');
+        echo $OUTPUT->container_start('attendanceregister_buttonbar btn-group');
         
         // Printable version button or Back to normal version
         $linkUrl = attendanceregister_makeUrl($register, $userId, null, ( ($doShowPrintableVersion) ? (null) : (ATTENDANCEREGISTER_ACTION_PRINTABLE)));
@@ -351,15 +350,18 @@ else if ($doShowContents) {
         }
 
 //    // Show tracked Courses
-//    echo "<br />";
+//    echo '<div class="table-responsive">';
 //    echo html_writer::table( $userSessions->trackedCourses->html_table()  );
+//    echo '</div>';    
 
         // Show User's Sessions summary
-        echo "<br />";
+        echo '<div class="table-responsive">';
         echo html_writer::table($userSessions->userAggregates->html_table());
-
-        echo "<br />";
+        echo '</div>';
+        
+        echo '<div class="table-responsive">';       
         echo html_writer::table($userSessions->html_table());
+        echo '</div>';
     }
 
     //// Show list of Tracked Users summary
@@ -375,12 +377,12 @@ else if ($doShowContents) {
             echo $OUTPUT->notification( get_string('first_calc_at_next_cron_run', 'attendanceregister')  );
         }
 
-        echo $OUTPUT->container_start('attendanceregister_buttonbar');
-
+        echo $OUTPUT->container_start('attendanceregister_buttonbar btn-group');
+        
         // If current user is tracked, show view-my-sessions button [feature #28]
         if ( $userCapabilities->isTracked ) {
             $linkUrl = attendanceregister_makeUrl($register, $USER->id);
-            echo $OUTPUT->single_button($linkUrl, get_string('show_my_sessions' ,'attendanceregister'), 'get');
+            echo $OUTPUT->single_button($linkUrl, get_string('show_my_sessions' ,'attendanceregister'), 'get' );
         }
         
         // Printable version button or Back to normal version
@@ -391,13 +393,14 @@ else if ($doShowContents) {
         echo '<br />';
 
         // Show list of tracked courses
-        echo "<br />";
+        echo '<div class="table-responsive">'; 
         echo html_writer::table($trackedUsers->trackedCourses->html_table());
-
+        echo '</div>';
 
         // Show tracked Users list
-        echo "<br />";
+        echo '<div class="table-responsive">'; 
         echo html_writer::table($trackedUsers->html_table());
+        echo '</div>';
     }
 }
 

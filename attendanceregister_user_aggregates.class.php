@@ -108,7 +108,7 @@ class attendanceregister_user_aggregates  {
         global $OUTPUT, $doShowPrintableVersion;
 
         $table = new html_table();
-        $table->attributes['class'] .= ' attendanceregister_usersummary';
+        $table->attributes['class'] .= ' attendanceregister_usersummary table table-condensed table-bordered table-striped table-hover';
 
 
         // Header
@@ -151,7 +151,6 @@ class attendanceregister_user_aggregates  {
         $table->data[] = $row;
 
         // Last Calculated Session Logout
-        // TODO ad CSS classes
         $row = new html_table_row();
         $labelCell = new html_table_cell();
         $labelCell->colspan = 2;
@@ -168,9 +167,8 @@ class attendanceregister_user_aggregates  {
 
 
         // Online Total
-        // TODO ad CSS classes
         $row = new html_table_row();
-        $row->attributes['class'] .= ' attendanceregister_onlinesubtotal';
+        $row->attributes['class'] .= ' attendanceregister_onlinesubtotal success';
         $labelCell = new html_table_cell();
         $labelCell->colspan = 2;
         $labelCell->text = get_string('online_sessions_total_duration', 'attendanceregister');
@@ -189,8 +187,8 @@ class attendanceregister_user_aggregates  {
 
             // Offline per RefCourse (if any)
             foreach($this->perCourseOfflineSessions as $refCourseId => $courseOfflineSessions  ) {
-                // TODO ad CSS classes
                 $row = new html_table_row();
+                $row->attributes['class'] .= '';
                 $labelCell = new html_table_cell();
                 $labelCell->text = get_string('offline_refcourse_duration', 'attendanceregister');
                 $row->cells[] = $labelCell;
@@ -212,8 +210,8 @@ class attendanceregister_user_aggregates  {
 
             // Offline no-RefCourse (if any)
             if ( $this->noCourseOfflineSessions ) {
-                // TODO ad CSS classes
                 $row = new html_table_row();
+                 $row->attributes['class'] .= '';
                 $labelCell = new html_table_cell();
                 $labelCell->text = get_string('offline_refcourse_duration', 'attendanceregister');
                 $row->cells[] = $labelCell;
@@ -230,7 +228,6 @@ class attendanceregister_user_aggregates  {
             }
 
             // Offline Total (if any)
-            // TODO ad CSS classes
             $row = new html_table_row();
             $row->attributes['class'] .= ' attendanceregister_offlinesubtotal';
             $labelCell = new html_table_cell();
@@ -246,9 +243,8 @@ class attendanceregister_user_aggregates  {
 
 
             // GrandTotal
-            // TODO ad CSS classes
             $row = new html_table_row();
-            $row->attributes['class'] .= ' attendanceregister_grandtotal';
+            $row->attributes['class'] .= ' attendanceregister_grandtotal active';
             $labelCell = new html_table_cell();
             $labelCell->colspan = 2;
             $labelCell->text = get_string('sessions_grandtotal_duration', 'attendanceregister');
