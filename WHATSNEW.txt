@@ -1,4 +1,8 @@
 Attendance Register Module - What's New
+# Moodle 2.5 compatibility release 2013.09.07.01
+Fixes
+* [#58] Removed usage of deprecated get_context_instance() function
+* [#59] Improved readability using Bootstrap based themes
 
 # Bugfix 2013.07.06.01
 (I've abandoned the previous version numbering, often confused with supported Moodle version number)
