@@ -99,7 +99,7 @@ class attendanceregister_tracked_users {
         $strNotAvail = get_string('notavailable');
 
         $table = new html_table();
-        $table->attributes['class'] .= ' attendanceregister_userlist';
+        $table->attributes['class'] .= ' attendanceregister_userlist table table-condensed table-bordered table-striped table-hover';
 
         /// Header
 
