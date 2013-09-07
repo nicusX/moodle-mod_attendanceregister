@@ -72,7 +72,7 @@ class attendanceregister_user_sessions {
         global $OUTPUT, $doShowPrintableVersion;
 
         $table = new html_table();
-        $table->attributes['class'] .= ' attendanceregister_sessionlist';
+        $table->attributes['class'] .= ' attendanceregister_sessionlist table table-condensed table-bordered table-striped table-hover';
 
         /// Header
 
@@ -141,6 +141,7 @@ class attendanceregister_user_sessions {
                     }
                     $tableCell = new html_table_cell($onlineOfflineStr);
                     $tableCell->attributes['class'] .=  ( ($session->onlinesess)?' online_label':' offline_label' );
+                    $tableRow->attributes['class'] .= ( ($session->onlinesess)?' success':'' );
                     $tableRow->cells[] = $tableCell;
 
                     // Ref.Course

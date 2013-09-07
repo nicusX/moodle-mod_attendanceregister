@@ -48,7 +48,7 @@ class attendanceregister_tracked_courses {
         global $OUTPUT, $doShowPrintableVersion;
 
         $table = new html_table();
-        $table->attributes['class'] .= ' attendanceregister_courselist';
+        $table->attributes['class'] .= ' attendanceregister_courselist table table-condensed table-bordered table-striped table-hover';
 
         $tableHeadCell = new html_table_cell(get_string('tracked_courses', 'attendanceregister'));
         $tableHeadCell->colspan = 2;
