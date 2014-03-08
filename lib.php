@@ -455,6 +455,7 @@ function attendanceregister_update_user_sessions($register, $userId, progress_ba
     if (!$recalculation && attendanceregister__check_lock_exists($register, $userId)) {
         // (if a progress bar exists, before exiting reset it)
         attendanceregister__finalize_progress_bar($progressbar, get_string('online_session_updated', 'attendanceregister'));
+        mtrace("Lock found on registerId:$register->id, userId:$userId. Skip updating.");
         return false;
     }
 
@@ -462,9 +463,11 @@ function attendanceregister_update_user_sessions($register, $userId, progress_ba
     if ($recalculation) {
         $lastSessionLogout = 0;
         $needUpdate = true;
+        mtrace("Forced recalc of sessions");
     } else {
         $lastSessionLogout = 0;
         $needUpdate = attendanceregister_check_user_sessions_need_update($register, $userId, $lastSessionLogout);
+        mtrace("registerId:$register->id, userId:$userId ". (($needUpdate)?"needs update":"doesn't need update"));
     }
 
     if ($needUpdate) {
@@ -545,14 +548,14 @@ function attendanceregister_force_recalc_all($register) {
 function attendanceregister_updates_all_users_sessions($register) {
     // [issue #37] Gets only users whose sessions need updating
     $users = attendanceregister__get_tracked_users_need_update($register); 
-    mtrace('Found ' . count($users) . ' Users whose AttendanceRegister Sessions need updating');
+    debugging('Found ' . count($users) . ' Users whose AttendanceRegister Sessions need updating');
     $updatedUsersCount = 0;
     foreach ($users as $user) {
         if (attendanceregister_update_user_sessions($register, $user->id)) {
-            mtrace('Updated AttendanceRegister Sessions for User: ' . $user->id . ',' . $user->username);
+            debugging('Updated AttendanceRegister Sessions for User: ' . $user->id . ',' . $user->username);
             $updatedUsersCount++;
         }  else {
-            mtrace('No actual update of AttendanceRegister Sessions for User: ' . $user->id . ',' .  $user->username);
+            debugging('No actual update of AttendanceRegister Sessions for User: ' . $user->id . ',' .  $user->username);
         }
     }
     return $updatedUsersCount;
@@ -586,20 +589,27 @@ function attendanceregister_check_user_sessions_need_update($register, $userId, 
 
     // If user never logged in, no update needed ;)
     if (!$user->lastaccess) {
+        debugging("UserId:$userId never logged in: no session update needed on registerId:$register->id");
         return false;
     }
 
     // If No User Aggregate yet, need update and lastSessionLogout is 0
     if (!$userGrandTotalAggregate) {
+        debugging("userId:$userId has no User Aggregate: session update needed on registerId:$register->id");
         $lastSessionLogout = 0;
         return true;
     }
 
+    $now = time();
     // TODO this business rule is duplicated in attendanceregister__get_tracked_users_need_update() but in a different form: SQL subqery, negated (to exclude users that do not need updating). This is no good!
-    if (($user->currentlogin > $userGrandTotalAggregate->lastsessionlogout) && ( (time() - $user->currentlogin) > ($register->sessiontimeout * 60) )) {
+    
+    if (($user->lastaccess > $userGrandTotalAggregate->lastsessionlogout) 
+            && ( ($now - $user->lastaccess) > ($register->sessiontimeout * 60) )) {
         $lastSessionLogout = $userGrandTotalAggregate->lastsessionlogout;
+        debugging("userId:$userId; session update needed on registerId:$register->id as LastSession logout=$lastSessionLogout, lastAccess=$user->lastaccess");
         return true;
     } else {
+        debugging("userId:$userId; no session update needed on registerId:$register->id");
         return false;
     }
 }

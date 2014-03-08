@@ -148,7 +148,7 @@ $string['last_session_logout'] = 'Last Session End';
 $string['last_calc_online_session_logout'] = 'Last Register online Session End (excl. current Session)';
 $string['last_site_login'] = 'Last login on Site';
 $string['prev_site_login'] = 'Previous login on Site';
-$string['last_site_access'] = 'Last actitity on Site';
+$string['last_site_access'] = 'Last activity on Site';
 
 $string['no_session_for_this_user'] = '- No Session for this User, yet -';
 $string['no_tracked_user'] = '- No User tracked by this Attendance Register -';
