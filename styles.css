@@ -44,8 +44,8 @@
 .attendanceregister_userlist .attendanceregister_oddrow {  background-color: #FEFEFE; }
 
 /* Button Bars */
-.attendanceregister_buttonbar {position: absolute; right: 10px; overflow: auto;}
-.attendanceregister_buttonbar div.singlebutton { float: left; margin-left: 5px; }
+.attendanceregister_buttonbar {float: right;}
+.attendanceregister_buttonbar div.singlebutton { float: left; }
 .attendanceregister_buttonbar span.helplink {float: left;}
 
 /* Print media styles */
