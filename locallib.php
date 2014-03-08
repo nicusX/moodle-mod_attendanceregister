@@ -89,7 +89,7 @@ function attendanceregister__build_new_user_sessions($register, $userId, $fromTi
     $sessionLastEntryTimestamp = 0;
 
 
-    // lop new entries if any
+    // loop new entries if any
     if (is_array($logEntries) && count($logEntries) > 0) {
 
         // Scroll all log entries
@@ -150,8 +150,10 @@ function attendanceregister__build_new_user_sessions($register, $userId, $fromTi
         }
     }
 
-    /// Updates Aggregates
-    attendanceregister__update_user_aggregates($register, $userId);
+    /// Updates Aggregates, only on new session creation
+    if( $newSessionsCount ) {
+        attendanceregister__update_user_aggregates($register, $userId);
+    }
 
 
     // Finalize Progress Bar
