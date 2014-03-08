@@ -1,9 +1,10 @@
 Attendance Register Module - What's New
 ### Work-in-progress ###
 Fixes
-# [#67] User session could be delayed until next login if user pauses activities
+* [#67] User session could be delayed until next login if user pauses activities
         for some time (shorter than PHP session) and the cron runs creating a 
         new session.
+* [#60] Fixed typo
 Performance fixes
 * [#63, #66] A couple of changes greatly reducing the number of queries executing 
         cron (thanks to MorrisR2)
