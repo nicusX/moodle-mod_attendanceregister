@@ -492,16 +492,14 @@ function attendanceregister__get_user_log_entries_in_courses($userId, $fromTime,
 
     // Prepare Queries for counting and selecting
     $selectListSQL = " *";
-    $countSQL = " COUNT(*)";
     $fromWhereSQL = " FROM {log} l WHERE l.userid = :userid AND l.time > :fromtime AND l.course IN ($courseIdList)";
     $orderBySQL = " ORDER BY l.time ASC";
-    $countQuerySQL = "SELECT" . $countSQL . $fromWhereSQL;
     $querySQL = "SELECT" . $selectListSQL . $fromWhereSQL . $orderBySQL;
 
     // Execute queries
     $params = array('userid' => $userId, 'fromtime' => $fromTime);
-    $logCount = $DB->count_records_sql($countQuerySQL, $params);
     $logEntries = $DB->get_records_sql($querySQL, $params);
+    $logCount = count($logEntries); // Optimization suggested by MorrisR2 [https://github.com/MorrisR2]
 
     return $logEntries;
 }
