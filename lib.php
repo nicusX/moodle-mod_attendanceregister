@@ -450,6 +450,7 @@ function attendanceregister_get_user_sessions($register, $userId) {
  * @return boolean true if any new session has been found
  */
 function attendanceregister_update_user_sessions($register, $userId, progress_bar $progressbar = null, $recalculation = false) {
+
     // If not running in Recalc,
     // check if a Lock exists on this User's Register; if so, exit immediately
     if (!$recalculation && attendanceregister__check_lock_exists($register, $userId)) {
@@ -580,7 +581,6 @@ function attendanceregister_updates_all_users_sessions($register) {
  */
 function attendanceregister_check_user_sessions_need_update($register, $userId, & $lastSessionLogout = null) {
     global $DB;
-
     // Retrive User
     $user = attendanceregister__getUser($userId);
 
@@ -781,32 +781,55 @@ function attendanceregister_makeUrl($register, $userId = null, $groupId = null, 
  * @param int $userId
  * @param int $groupId
  */
-function attendanceregister_add_to_log($register, $cmId, $action, $userId = null, $groupId = null) {
+function attendanceregister_add_to_log($register, $cmid, $action, $userid = null, $groupId = null) {
     // URL for logging
-    $logUrl = attendanceregister_makeUrl($register, $userId, $groupId, $action, null, true);
+    //$logUrl = attendanceregister_makeUrl($register, $userId, $groupId, $action, null, true);
+
+    // Add Log Entry
+    //add_to_log($register->course, 'attendanceregister', $logAction, $logUrl, '', $cmid);
+
 
     // Action for logging
     switch ($action) {
         case ATTENDANCEREGISTER_ACTION_RECALCULATE:
-            $logAction = ATTENDANCEREGISTER_LOGACTION_RECALCULTATE;
+            $event = \mod_attendanceregister\event\mod_attendance_recalculation::create(array(
+                'objectid' => $register->id,
+                'context' => context_module::instance($cmid)
+            ));
+            $event->trigger();
             break;
         case ATTENDANCEREGISTER_ACTION_SAVE_OFFLINE_SESSION:
-            $logAction = ATTENDANCEREGISTER_LOGACTION_ADD_OFFLINE;
+            $event = \mod_attendanceregister\event\user_attendance_addoffline::create(array(
+                'objectid' => $register->id,
+                'context' => context_module::instance($cmid)
+            ));
+            $event->trigger();
             break;
         case ATTENDANCEREGISTER_ACTION_DELETE_OFFLINE_SESSION:
-            $logAction = ATTENDANCEREGISTER_LOGACTION_DELETE_OFFLINE;
+            $event = \mod_attendanceregister\event\user_attendance_deloffline::create(array(
+                'objectid' => $register->id,
+                'context' => context_module::instance($cmid)
+            ));
+            $event->trigger();
             break;
-        case ATTENDANCEREGISTER_ACTION_PRINTABLE:
+        // case ATTENDANCEREGISTER_ACTION_PRINTABLE:
         default:
-            if ($userId) {
-                $logAction = ATTENDANCEREGISTER_LOGACTION_VIEW;
+            if ($userid) {
+                $event = \mod_attendanceregister\event\user_attendance_details_viewed::create(array(
+                    'objectid' => $register->id,
+                    'context' => context_module::instance($cmid),
+                    'relateduserid' => $userid
+                ));
+                $event->trigger();
             } else {
-                $logAction = ATTENDANCEREGISTER_LOGACTION_VIEW_ALL;
+                $event = \mod_attendanceregister\event\participants_attendance_report_viewed::create(array(
+                    'objectid' => $register->id,
+                    'context' => context_module::instance($cmid),
+                ));
+                $event->trigger();
             }
     }
 
-    // Add Log Entry
-    add_to_log($register->course, 'attendanceregister', $logAction, $logUrl, '', $cmId);
 }
 
 

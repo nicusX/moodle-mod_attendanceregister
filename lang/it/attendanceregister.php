@@ -198,3 +198,10 @@ $string['tracked_users'] = 'Utenti tracciati';
 // Activity Completion tracking
 $string['completiontotalduration'] = 'Tempo minimo [minuti]';
 $string['completiondurationgroup'] = 'Tempo totale tracciato';
+
+// Log
+$string['user_attendance_details_viewed'] = 'Visti dettagli di partecipazione singolo utente';
+$string['participants_attendance_report_viewed'] = 'Visto report generale partecipazione studenti';
+$string['user_attendance_deloffline'] = 'Cancellazione dichiarazione di partecipazione offline';
+$string['user_attendance_addoffline'] = 'Aggiunta dichiarazione di partecipazione offline';
+$string['mod_attendance_recalculation'] = 'Ricalcolo dei log per aggiornamento sessoni';
