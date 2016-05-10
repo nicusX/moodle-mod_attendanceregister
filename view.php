@@ -108,7 +108,7 @@ $doSaveOfflineSession = false;
 // Only if Offline Sessions are enabled (and No printable-version action)
 if ( $register->offlinesessions &&  !$doShowPrintableVersion  ) {
     // Only if User is NOT logged-in-as, or ATTENDANCEREGISTER_ALLOW_LOGINAS_OFFLINE_SESSIONS is enabled
-    if ( !session_is_loggedinas() || ATTENDANCEREGISTER_ALLOW_LOGINAS_OFFLINE_SESSIONS ) {
+    if ( !(\core\session\manager::is_loggedinas()) || ATTENDANCEREGISTER_ALLOW_LOGINAS_OFFLINE_SESSIONS ) {
         // If user is on his own Register and may save own Sessions
         // or is on other's Register and may save other's Sessions..
         if ( $userCapabilities->canAddThisUserOfflineSession($register, $userId) ) {

@@ -205,3 +205,6 @@ $string['participants_attendance_report_viewed'] = 'Visto report generale partec
 $string['user_attendance_deloffline'] = 'Cancellazione dichiarazione di partecipazione offline';
 $string['user_attendance_addoffline'] = 'Aggiunta dichiarazione di partecipazione offline';
 $string['mod_attendance_recalculation'] = 'Ricalcolo dei log per aggiornamento sessoni';
+
+// Cron
+$string['crontask']='Ricalcolo sessioni attendanceregister';

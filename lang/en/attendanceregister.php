@@ -196,3 +196,6 @@ $string['participants_attendance_report_viewed'] = 'Participants attendance repo
 $string['user_attendance_deloffline'] = 'User delete an offline attendance entry';
 $string['user_attendance_addoffline'] = 'User add an offline attendance entry';
 $string['mod_attendance_recalculation'] = 'Module recalculate log for sessions updates';
+
+// Cron
+$string['crontask']='Recalculate attendanceregister sessions';
