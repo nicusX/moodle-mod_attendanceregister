@@ -368,6 +368,20 @@ else if ($doShowContents) {
     else {
 
         /// Button bar
+	$manager = get_log_manager();
+	$allreaders = $manager->get_readers();
+	if (isset($allreaders['logstore_standard'])) {
+    		$standardreader = $allreaders['logstore_standard'];
+    		if ($standardreader->is_logging()) {
+        		// OK
+    		} else {
+        		// Standard log non scrive
+			echo $OUTPUT->notification( get_string('standardlog_readonly', 'attendanceregister')  );
+    		}
+	} else {
+    		// Standard log disabilitato 
+		echo $OUTPUT->notification( get_string('standardlog_disabled', 'attendanceregister')  );
+	}
         // Show Recalc pending warning
         if ( $register->pendingrecalc && $userCapabilities->canRecalcSessions && !$doShowPrintableVersion ) {
             echo $OUTPUT->notification( get_string('recalc_scheduled_on_next_cron', 'attendanceregister')  );

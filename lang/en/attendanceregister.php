@@ -199,3 +199,7 @@ $string['mod_attendance_recalculation'] = 'Module recalculate log for sessions u
 
 // Cron
 $string['crontask']='Recalculate attendanceregister sessions';
+
+// Alerts
+$string['standardlog_disabled'] = 'Moodle Standard Log is disabled. All new users session are not tracked';
+$string['standardlog_readonly'] = 'Moodle Standard Log is readonly. All new users session are not tracked'; 
