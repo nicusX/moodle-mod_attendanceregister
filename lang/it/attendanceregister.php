@@ -210,5 +210,5 @@ $string['mod_attendance_recalculation'] = 'Ricalcolo dei log per aggiornamento s
 $string['crontask']='Ricalcolo sessioni attendanceregister';
 
 // Alert
-$string['standardlog_disabled'] = 'Moodle Standard Log Ã disabilitato. Tutte le nuove sessioni degli utenti non sono tracciate';
-$string['standardlog_readonly'] = 'Moodle Standard Log Ã sola lettura. Tutte le nuove sessioni degli utenti non sono tracciate ';
+$string['standardlog_disabled'] = 'Moodle Standard Log Ã¨ disabilitato. Tutte le nuove sessioni degli utenti non sono tracciate';
+$string['standardlog_readonly'] = 'Moodle Standard Log Ã¨ sola lettura. Tutte le nuove sessioni degli utenti non sono tracciate';
