@@ -108,7 +108,7 @@ $doSaveOfflineSession = false;
 // Only if Offline Sessions are enabled (and No printable-version action)
 if ( $register->offlinesessions &&  !$doShowPrintableVersion  ) {
     // Only if User is NOT logged-in-as, or ATTENDANCEREGISTER_ALLOW_LOGINAS_OFFLINE_SESSIONS is enabled
-    if ( !session_is_loggedinas() || ATTENDANCEREGISTER_ALLOW_LOGINAS_OFFLINE_SESSIONS ) {
+    if ( !(\core\session\manager::is_loggedinas()) || ATTENDANCEREGISTER_ALLOW_LOGINAS_OFFLINE_SESSIONS ) {
         // If user is on his own Register and may save own Sessions
         // or is on other's Register and may save other's Sessions..
         if ( $userCapabilities->canAddThisUserOfflineSession($register, $userId) ) {
@@ -368,6 +368,20 @@ else if ($doShowContents) {
     else {
 
         /// Button bar
+	$manager = get_log_manager();
+	$allreaders = $manager->get_readers();
+	if (isset($allreaders['logstore_standard'])) {
+    		$standardreader = $allreaders['logstore_standard'];
+    		if ($standardreader->is_logging()) {
+        		// OK
+    		} else {
+        		// Standard log non scrive
+			echo $OUTPUT->notification( get_string('standardlog_readonly', 'attendanceregister')  );
+    		}
+	} else {
+    		// Standard log disabilitato 
+		echo $OUTPUT->notification( get_string('standardlog_disabled', 'attendanceregister')  );
+	}
         // Show Recalc pending warning
         if ( $register->pendingrecalc && $userCapabilities->canRecalcSessions && !$doShowPrintableVersion ) {
             echo $OUTPUT->notification( get_string('recalc_scheduled_on_next_cron', 'attendanceregister')  );

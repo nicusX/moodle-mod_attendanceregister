@@ -80,7 +80,6 @@ function attendanceregister__build_new_user_sessions($register, $userId, $fromTi
     $totalLogEntriesCount = 0;
     $logEntries = attendanceregister__get_user_log_entries_in_courses($userId, $fromTime, $trackedCoursesIds, $totalLogEntriesCount);
 
-
     $sessionTimeoutSeconds = $register->sessiontimeout * 60;
     $prevLogEntry = null;
     $sessionStartTimestamp = null;
@@ -99,18 +98,18 @@ function attendanceregister__build_new_user_sessions($register, $userId, $fromTi
             // On first element, get prev entry and session start, than loop.
             if (!$prevLogEntry) {
                 $prevLogEntry = $logEntry;
-                $sessionStartTimestamp = $logEntry->time;
+                $sessionStartTimestamp = $logEntry->timecreated;
                 continue;
             }
 
             // Check if between prev and current log, last more than Session Timeout
             // if so, the Session ends on the _prev_ log entry
-            if (($logEntry->time - $prevLogEntry->time) > $sessionTimeoutSeconds) {
+            if (($logEntry->timecreated - $prevLogEntry->timecreated) > $sessionTimeoutSeconds) {
                 $newSessionsCount++;
 
                 // Estimate Session ended half the Session Timeout after the prev log entry
                 // (prev log entry is the last entry of the Session)
-                $sessionLastEntryTimestamp = $prevLogEntry->time;
+                $sessionLastEntryTimestamp = $prevLogEntry->timecreated;
                 $estimatedSessionEnd = $sessionLastEntryTimestamp + $sessionTimeoutSeconds / 2;
 
                 // Save a new session to the prev entry
@@ -124,18 +123,18 @@ function attendanceregister__build_new_user_sessions($register, $userId, $fromTi
                 }
 
                 // Session has ended: session start on current log entry
-                $sessionStartTimestamp = $logEntry->time;
+                $sessionStartTimestamp = $logEntry->timecreated;
             }
             $prevLogEntry = $logEntry;
         }
 
         // If le last log entry is not the end of the last calculated session and is older than SessionTimeout
         // create a last session
-        if ( $logEntry->time > $sessionLastEntryTimestamp && ( time() - $logEntry->time ) > $sessionTimeoutSeconds  ) {
+        if ( $logEntry->timecreated > $sessionLastEntryTimestamp && ( time() - $logEntry->timecreated ) > $sessionTimeoutSeconds  ) {
             $newSessionsCount++;
 
             // In this case logEntry (and not prevLogEntry is the last entry of the Session)
-            $sessionLastEntryTimestamp = $logEntry->time;
+            $sessionLastEntryTimestamp = $logEntry->timecreated;
             $estimatedSessionEnd = $sessionLastEntryTimestamp + $sessionTimeoutSeconds / 2;
 
             // Save a new session to the prev entry
@@ -348,16 +347,17 @@ function attendanceregister__get_tracked_users_need_update($register) {
         // c1) Have no online session in this register
         // c2) Have no calculated aggregate for this register
         // c3) Last log entry for the tracked course is newer than last recorded session in this register (stored in aggregate)
+
         $sql = "SELECT u.*  FROM {user} u JOIN ($esql) je ON je.id = u.id
                 WHERE u.lastaccess + (:sesstimeout * 60) < :now
                   AND ( NOT EXISTS (SELECT * FROM {attendanceregister_session} as3
                                      WHERE as3.userid = u.id AND as3.register = :registerid1 AND as3.onlinesess = 1)
                         OR NOT EXISTS (SELECT * FROM {attendanceregister_aggregate} aa4 WHERE aa4.userid=u.id AND aa4.register=:registerid2  AND aa4.grandtotal = 1 )
-                        OR EXISTS (SELECT * FROM {attendanceregister_aggregate} aa2, {log} l2
+                        OR EXISTS (SELECT * FROM {attendanceregister_aggregate} aa2, {logstore_standard_log} l2
                                     WHERE aa2.userid = u.id AND aa2.register = :registerid3 
-                                      AND l2.course = :courseid AND l2.userid = aa2.userid                                  
+                                      AND l2.courseid = :courseid AND l2.userid = aa2.userid                                  
                                       AND aa2.grandtotal = 1
-                                      AND l2.time > aa2.lastsessionlogout) )";
+                                      AND l2.timecreated > aa2.lastsessionlogout) )";
             
         // Append subquery parameters
         $params['sesstimeout'] = $register->sessiontimeout;
@@ -366,6 +366,8 @@ function attendanceregister__get_tracked_users_need_update($register) {
         $params['registerid2'] = $register->id;
         $params['registerid3'] = $register->id;
         $params['courseid'] = $courseId;
+
+
         // Execute query
         $trackedUsersInCourse = $DB->get_records_sql($sql, $params);        
         
@@ -494,8 +496,8 @@ function attendanceregister__get_user_log_entries_in_courses($userId, $fromTime,
 
     // Prepare Queries for counting and selecting
     $selectListSQL = " *";
-    $fromWhereSQL = " FROM {log} l WHERE l.userid = :userid AND l.time > :fromtime AND l.course IN ($courseIdList)";
-    $orderBySQL = " ORDER BY l.time ASC";
+    $fromWhereSQL = " FROM {logstore_standard_log} l WHERE l.userid = :userid AND l.timecreated > :fromtime AND l.courseid IN ($courseIdList)";
+    $orderBySQL = " ORDER BY l.timecreated ASC";
     $querySQL = "SELECT" . $selectListSQL . $fromWhereSQL . $orderBySQL;
 
     // Execute queries
@@ -626,7 +628,7 @@ function attendanceregister__delete_user_aggregates($register, $userId) {
  */
 function attendanceregister__get_user_oldest_log_entry_timestamp($userId) {
     global $DB;
-    $obj = $DB->get_record_sql('SELECT MIN(time) as oldestlogtime FROM {log} WHERE userid = :userid', array( 'userid' => $userId ), IGNORE_MISSING );
+    $obj = $DB->get_record_sql('SELECT MIN(timecreated) as oldestlogtime FROM {logstore_standard_log} WHERE userid = :userid', array( 'userid' => $userId ), IGNORE_MISSING );
     if ( $obj ) {
         return $obj->oldestlogtime;
     }

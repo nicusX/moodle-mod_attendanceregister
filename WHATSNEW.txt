@@ -1,5 +1,11 @@
 Attendance Register Module - What's New
+## RELEASE 2.5.1 (2016050900)
+Fixes
+*		Support for scheduled tasks
 
+## RELEASE 2.5.0 (2015111200) Moodle 2.7 compatibility release 2015.11.12.00
+New features
+*		Support for new logging system 
 # Bugfix and performance 2014.03.08.05
 Fixes
 * [#67] User session could be delayed until next login if user pauses activities
