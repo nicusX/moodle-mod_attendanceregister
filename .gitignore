@@ -1,0 +1,9 @@
+# IntelliJ
+.idea/
+
+# Eclipse
+.settings/
+.project
+.buildpath
+*.launch
+tmp/

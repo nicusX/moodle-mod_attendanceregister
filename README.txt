@@ -13,6 +13,7 @@ This program is distributed in the hope that it will be useful, but WITHOUT ANY 
 Created by: Lorenzo Nicora (nicus)
 Thanks to MediaTouch 2000 (www.mediatouch.it) for great testing support.
 Based on the idea of Register module for Moodle 1.x, originally created by Domenico Pontari (fairsayan@gmail.com)
+Support for Moodle 2.7+ by CINECA https://github.com/CinecaElearning
 
 Project Page:
 * https://github.com/nicusX/moodle-mod_attendanceregister
