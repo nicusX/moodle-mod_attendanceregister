@@ -34,7 +34,11 @@ class mod_attendanceregister_mod_form extends moodleform_mod {
         $mform->addRule('name', get_string('maximumchars', '', 255), 'maxlength', 255, 'client');
 
         // Intro
-        $this->add_intro_editor(true);
+        if ($CFG->branch < 29) {
+            $this->add_intro_editor(true);
+        } else {
+            $this->standard_intro_elements();
+        }
 
         // Register Type
         $register_types = attendanceregister_get_register_types( );
